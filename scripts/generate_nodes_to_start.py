@@ -1,5 +1,5 @@
 """
-Script to generate data/nodes_to_start.txt from data/sample.txt
+Script to generate data/nodes_to_start.txt from data/sample_text.txt
 by extracting one entity per sentence using the repo's SVO extraction logic.
 """
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
         download(model)
         nlp = spacy.load(model)
 
-    with open("data/sample.txt", "r", encoding="utf-8") as fin, open("data/nodes_to_start.txt", "w", encoding="utf-8") as fout:
+    with open("data/sample_text.txt", "r", encoding="utf-8") as fin, open("data/nodes_to_start.txt", "w", encoding="utf-8") as fout:
         text = fin.read()
         for sent in nlp(text).sents:
             svos = extract_svo_from_sentence(sent.text, nlp)
