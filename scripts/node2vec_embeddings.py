@@ -11,17 +11,39 @@ except ImportError:
     print("node2vec not found. Please install with `pip install node2vec`")
     raise
 
-def generate_node2vec_embeddings(kg_path, dimensions=64, walk_length=30, num_walks=200, workers=2, seed=42, output_path=None):
+def generate_node2vec_embeddings(
+    kg_path,
+    dimensions=64,
+    walk_length=30,
+    num_walks=200,
+    workers=2,
+    seed=42,
+    directed=True,
+    p=1.0,
+    q=1.0,
+    output_path=None
+):
     # Load the KG
     with open(kg_path, "rb") as f:
         G = pickle.load(f)
     print(f"Loaded KG with {G.number_of_nodes()} nodes and {G.number_of_edges()} edges.")
 
-    # Node2Vec expects an undirected graph, but for semantic boundary detection, directed might be useful
-    # We'll use directed here, but you can also try G.to_undirected() if needed
+    # BLT hint: Try both directed and undirected graphs for embedding
+    if not directed:
+        G = G.to_undirected()
+        print("Converted graph to undirected for embedding.")
+
+    # BLT hint: Tune p (return) and q (in-out) parameters for walk bias
     node2vec = Node2Vec(
-        G, dimensions=dimensions, walk_length=walk_length,
-        num_walks=num_walks, workers=workers, seed=seed, quiet=True
+        G,
+        dimensions=dimensions,
+        walk_length=walk_length,
+        num_walks=num_walks,
+        workers=workers,
+        seed=seed,
+        quiet=True,
+        p=p,
+        q=q,
     )
 
     # Fit model
@@ -53,7 +75,18 @@ def main():
     parser.add_argument("--walk_length", type=int, default=30, help="Length of walk per source.")
     parser.add_argument("--num_walks", type=int, default=200, help="Number of walks per node.")
     parser.add_argument("--workers", type=int, default=2, help="Number of worker threads.")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed.")
+    parser.add_argument("--directed", action="store_true", help="Use directed graph for embedding (default).")
+    parser.add_argument("--undirected", action="store_true", help="Force undirected graph for embedding.")
+    parser.add_argument("--p", type=float, default=1.0, help="Node2vec return parameter p (default: 1.0).")
+    parser.add_argument("--q", type=float, default=1.0, help="Node2vec in-out parameter q (default: 1.0).")
     args = parser.parse_args()
+
+    if args.directed and args.undirected:
+        print("Cannot specify both --directed and --undirected. Choose one.")
+        return
+
+    directed = not args.undirected  # Default: directed
 
     generate_node2vec_embeddings(
         kg_path=args.kg,
@@ -61,6 +94,10 @@ def main():
         walk_length=args.walk_length,
         num_walks=args.num_walks,
         workers=args.workers,
+        seed=args.seed,
+        directed=directed,
+        p=args.p,
+        q=args.q,
         output_path=args.output,
     )
 
