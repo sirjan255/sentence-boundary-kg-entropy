@@ -1,23 +1,22 @@
 import argparse
 import pickle
 import numpy as np
-import os
-import json
-from collections import deque, defaultdict
+from collections import deque
 from sklearn.metrics.pairwise import cosine_similarity
+import json
+import sys
+import os
+
+# Import the updated entropy logic
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
+from entropy import node_entropy
 
 def load_embeddings(emb_path, nodes_path):
-    """
-    Loads node embeddings and returns:
-    - node2idx: maps node name to embedding index
-    - idx2node: maps embedding index to node name
-    - embeddings: numpy array of shape (num_nodes, dim)
-    """
     embeddings = np.load(emb_path)
     with open(nodes_path, "r", encoding="utf-8") as f:
-        idx2node = [line.strip() for line in f]
-    node2idx = {node: idx for idx, node in enumerate(idx2node)}
-    assert embeddings.shape[0] == len(idx2node)
+        node_names = [line.strip() for line in f if line.strip()]
+    node2idx = {n: i for i, n in enumerate(node_names)}
+    idx2node = {i: n for n, i in node2idx.items()}
     return node2idx, idx2node, embeddings
 
 def load_start_nodes(path):
@@ -25,21 +24,11 @@ def load_start_nodes(path):
     with open(path, "r", encoding="utf-8") as f:
         return [line.strip() for line in f if line.strip()]
 
-def compute_entropy(neigh_embs, curr_emb):
-    """
-    Computes a simple entropy-like measure:
-    - Similarity of current node to all neighbor nodes
-    - Higher entropy (low similarity) = likely boundary
-    You can replace with more advanced/statistical entropy if desired
-    """
-    if len(neigh_embs) == 0:
-        return 1.0  # No neighbors, max uncertainty
-    similarities = cosine_similarity([curr_emb], neigh_embs)[0]
-    avg_sim = np.mean(similarities)
-    entropy = 1.0 - avg_sim  # Higher value = more "different" (possible boundary)
-    return entropy
-
-def traverse_with_entropy(G, node2idx, embeddings, start_node, entropy_threshold=0.35, max_depth=10):
+def traverse_with_entropy(
+    G, node2idx, embeddings, start_node,
+    entropy_threshold=0.8, max_depth=10,
+    method="blt", temperature=1.0
+):
     """
     Traverse KG from start_node using entropy to decide when to halt (boundary).
     Returns:
@@ -58,14 +47,16 @@ def traverse_with_entropy(G, node2idx, embeddings, start_node, entropy_threshold
         curr, depth = q.popleft()
         if depth >= max_depth:
             continue
+        # Collect both successors and predecessors
         neighbors = set(G.successors(curr)) | set(G.predecessors(curr))
         for neigh in neighbors:
             if neigh in visited:
                 continue
-            curr_emb = embeddings[node2idx[curr]]
-            neigh_emb = embeddings[node2idx[neigh]]
-            # Entropy as "semantic divergence" from current node to neighbor
-            entropy = compute_entropy([neigh_emb], curr_emb)
+            # Use BLT-style node entropy
+            entropy = node_entropy(
+                embeddings, node2idx, curr, [neigh],
+                method=method, temperature=temperature
+            )
             entropies[neigh] = entropy
             if entropy < entropy_threshold:
                 visited.add(neigh)
@@ -81,40 +72,41 @@ def main():
     parser.add_argument("--nodes", type=str, required=True, help="Node order .txt file (outputs/embeddings_nodes.txt)")
     parser.add_argument("--start_nodes", type=str, required=True, help="File with starting nodes (data/nodes_to_start.txt)")
     parser.add_argument("--output", type=str, required=True, help="Output JSON file for predicted boundaries (outputs/boundaries.json)")
-    parser.add_argument("--entropy_threshold", type=float, default=0.35, help="Entropy threshold for boundary detection")
+    parser.add_argument("--entropy_threshold", type=float, default=0.8, help="Entropy threshold for boundary detection (BLT-style: 0.8 is a good start)")
     parser.add_argument("--max_depth", type=int, default=10, help="Max BFS depth")
+    parser.add_argument("--entropy_method", type=str, default="blt", choices=["blt", "cosine"], help="Entropy method: blt (default) or cosine (legacy)")
+    parser.add_argument("--temperature", type=float, default=1.0, help="Softmax temperature for BLT-style entropy")
     args = parser.parse_args()
 
     # Load KG
     with open(args.kg, "rb") as f:
         G = pickle.load(f)
-    # Load embeddings
+    # Load embeddings and node mappings
     node2idx, idx2node, embeddings = load_embeddings(args.embeddings, args.nodes)
     # Load starting nodes
     start_nodes = load_start_nodes(args.start_nodes)
 
-    # Traverse from each starting node
-    boundaries = dict()
+    results = {}
     for start in start_nodes:
         if start not in node2idx:
-            print(f"[WARN] Start node '{start}' not found in KG/embeddings. Skipping.")
+            print(f"Warning: start node '{start}' not in node2idx, skipping.", file=sys.stderr)
             continue
-        nodes, entropies = traverse_with_entropy(
+        nodes_in_sentence, entropies = traverse_with_entropy(
             G, node2idx, embeddings, start,
             entropy_threshold=args.entropy_threshold,
-            max_depth=args.max_depth
+            max_depth=args.max_depth,
+            method=args.entropy_method,
+            temperature=args.temperature
         )
-        # For each node, store its entropy. Mark nodes with highest entropy as likely boundaries.
-        boundaries[start] = {
-            "nodes_in_sentence": nodes,
-            "entropies": {n: entropies[n] for n in nodes if n in entropies}
+        results[start] = {
+            "nodes_in_sentence": nodes_in_sentence,
+            "entropies": {k: float(v) for k, v in entropies.items()},
         }
-        print(f"Start node '{start}': found {len(nodes)} nodes in predicted sentence.")
 
-    # Save output
+    # Save results
     with open(args.output, "w", encoding="utf-8") as f:
-        json.dump(boundaries, f, indent=2)
-    print(f"Boundaries written to {args.output}")
+        json.dump(results, f, indent=2)
+    print(f"Saved sentence boundary predictions to {args.output}")
 
 if __name__ == "__main__":
     main()
