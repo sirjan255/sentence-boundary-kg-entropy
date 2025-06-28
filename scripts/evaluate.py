@@ -1,27 +1,20 @@
 import argparse
-import json
 import os
-from collections import defaultdict
+import json
 from sklearn.metrics import f1_score, precision_score, recall_score
+import numpy as np
+import matplotlib.pyplot as plt
 
 def load_boundaries(path):
-    """
-    Loads predicted or gold boundaries in the format:
-    {
-      "start_node1": {
-        "nodes_in_sentence": [node1, node2, ...],
-        ...
-      },
-      ...
-    }
-    Returns a dict: start_node -> set(nodes_in_sentence)
-    """
     with open(path, "r", encoding="utf-8") as f:
         boundaries = json.load(f)
     result = dict()
+    entropies = dict()
     for k, v in boundaries.items():
+        # v: { "nodes_in_sentence": [...], "entropies": {node: entropy, ...} }
         result[k] = set(v["nodes_in_sentence"])
-    return result
+        entropies[k] = v.get("entropies", {})
+    return result, entropies
 
 def evaluate_sentence_grouping(pred, gold):
     """
@@ -34,13 +27,11 @@ def evaluate_sentence_grouping(pred, gold):
         gold_set = gold[start]
         pred_set = pred.get(start, set())
         if not pred_set:
-            # If no prediction, treat as all false (worst case)
             f1s.append(0.0)
             precisions.append(0.0)
             recalls.append(0.0)
             missing += 1
             continue
-        # Convert sets to binary labels over the union of both sets
         all_nodes = sorted(gold_set | pred_set)
         y_true = [1 if n in gold_set else 0 for n in all_nodes]
         y_pred = [1 if n in pred_set else 0 for n in all_nodes]
@@ -66,7 +57,6 @@ def boundary_precision(pred, gold):
         if not pred_nodes:
             continue
         pred_last = None
-        # If prediction is a set, convert to ordered list (for deterministic order)
         if isinstance(pred_nodes, set):
             pred_nodes = sorted(pred_nodes)
         if isinstance(pred_nodes, list):
@@ -90,33 +80,82 @@ def traversal_efficiency(pred, gold):
         ratios.append(len(pred_set) / len(gold_set))
     return sum(ratios) / len(ratios) if ratios else 0.0
 
+def entropy_analysis(pred_entropies, pred, gold):
+    """
+    Analyze entropy at predicted boundary nodes vs. inner nodes.
+    Print and plot statistics for insight into BLT-style entropy effectiveness.
+    """
+    boundary_entropies = []
+    non_boundary_entropies = []
+    misses = 0
+
+    for start in gold.keys():
+        pred_nodes = pred.get(start, [])
+        entropies = pred_entropies.get(start, {})
+        if not pred_nodes or not entropies:
+            misses += 1
+            continue
+        if isinstance(pred_nodes, set):
+            pred_nodes = sorted(pred_nodes)
+        boundary_node = pred_nodes[-1]
+        # Entropy at the predicted boundary
+        boundary_entropy = entropies.get(boundary_node, None)
+        if boundary_entropy is not None:
+            boundary_entropies.append(boundary_entropy)
+        # Entropy at inner nodes
+        for n in pred_nodes[:-1]:
+            e = entropies.get(n, None)
+            if e is not None:
+                non_boundary_entropies.append(e)
+    print("\nEntropy Analysis (BLT-style):")
+    print(f"  Number of samples: {len(boundary_entropies)} boundaries, {len(non_boundary_entropies)} inner nodes")
+    print(f"  Misses (no prediction or entropies): {misses}")
+    print(f"  Boundary entropy: mean={np.mean(boundary_entropies):.3f}, std={np.std(boundary_entropies):.3f}")
+    print(f"  Non-boundary entropy: mean={np.mean(non_boundary_entropies):.3f}, std={np.std(non_boundary_entropies):.3f}")
+
+    # Optional: plot
+    try:
+        plt.figure(figsize=(7,4))
+        plt.hist(boundary_entropies, bins=20, alpha=0.7, label="Boundary nodes")
+        plt.hist(non_boundary_entropies, bins=20, alpha=0.7, label="Non-boundary nodes")
+        plt.xlabel("Entropy")
+        plt.ylabel("Count")
+        plt.title("Entropy distribution at boundaries vs. inner nodes")
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+    except Exception as e:
+        print(f"Plotting failed (no display?): {e}")
+
 def main():
     parser = argparse.ArgumentParser(description="Evaluate sentence boundary detection on KG traversal results.")
     parser.add_argument("--gold", type=str, required=True, help="Gold standard boundaries JSON file")
     parser.add_argument("--pred", type=str, required=True, help="Predicted boundaries JSON file")
+    parser.add_argument("--entropy_analysis", action="store_true", help="Analyze and plot entropy statistics (BLT-style)")
     args = parser.parse_args()
 
     if not os.path.exists(args.gold):
-        print(f"Gold file {args.gold} not found.")
+        print(f"Gold file {args.gold} does not exist.")
         return
     if not os.path.exists(args.pred):
-        print(f"Prediction file {args.pred} not found.")
+        print(f"Prediction file {args.pred} does not exist.")
         return
 
-    gold = load_boundaries(args.gold)
-    pred = load_boundaries(args.pred)
+    gold, _ = load_boundaries(args.gold)
+    pred, pred_entropies = load_boundaries(args.pred)
 
     macro_f1, macro_prec, macro_rec, missing = evaluate_sentence_grouping(pred, gold)
-    b_prec = boundary_precision(pred, gold)
+    bound_prec = boundary_precision(pred, gold)
     eff = traversal_efficiency(pred, gold)
 
-    print("==== Sentence Boundary Detection Evaluation ====")
-    print(f"Macro F1-score (sentence grouping): {macro_f1:.4f}")
-    print(f"Macro Precision:                   {macro_prec:.4f}")
-    print(f"Macro Recall:                      {macro_rec:.4f}")
-    print(f"Boundary Precision (endpoint):     {b_prec:.4f}")
-    print(f"Traversal Efficiency (ratio):      {eff:.4f}")
-    print(f"Num. missing predictions:          {missing} / {len(gold)}")
+    print(f"\nEvaluation Results:")
+    print(f"  Macro F1: {macro_f1:.3f} | Macro Prec: {macro_prec:.3f} | Macro Rec: {macro_rec:.3f}")
+    print(f"  Boundary Precision: {bound_prec:.3f}")
+    print(f"  Traversal Efficiency: {eff:.3f}")
+    print(f"  Missing predictions: {missing} / {len(gold)}")
+
+    if args.entropy_analysis:
+        entropy_analysis(pred_entropies, pred, gold)
 
 if __name__ == "__main__":
     main()
