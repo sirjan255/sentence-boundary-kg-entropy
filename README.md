@@ -207,7 +207,70 @@ python scripts/gnn_boundary_classifier_experiments.py --kg outputs/kg.pkl --embe
 
 ---
 
-## 10. Summary
+## 10. Knowledge Graph Demo with Neo4j
+
+This section guides you through running a demo knowledge graph using Neo4j and Python.
+
+### Steps:
+
+1. **Install Neo4j Desktop**
+
+   - Download Neo4j Desktop from [https://neo4j.com/download/](https://neo4j.com/download/)
+   - Install and launch Neo4j Desktop on your system.
+   - Create and start a new database instance.
+   - Set an initial password when prompted and remember it.
+
+2. **Configure Environment Variables**
+
+   - Set up environment variables for Neo4j credentials:
+     - `NEO4J_USER` (default is `neo4j`)
+     - `NEO4J_PASSWORD` (your password set in Neo4j Desktop)
+   - In your terminal, set the password as follows (for PowerShell/VSCode Terminal on Windows):
+
+     ```powershell
+     $env:NEO4J_PASSWORD="your_actual_password"
+     ```
+
+   - Or, for Command Prompt (CMD):
+
+     ```cmd
+     set NEO4J_PASSWORD=your_actual_password
+     ```
+
+3. **Install Python Dependencies**
+
+   - Activate your virtual environment and install the Neo4j Python driver:
+
+     ```sh
+     pip install neo4j
+     ```
+
+4. **Run the Demo Script**
+
+   - Execute the demo script to load the sample SVO triplets into Neo4j:
+
+     ```powershell
+     python scripts/demo_neo4j_graph.py
+     ```
+
+5. **Visualize the Graph**
+
+   - Open your browser and go to [http://localhost:7474](http://localhost:7474)
+   - Log in using the username (`neo4j`) and your password.
+   - Use Cypher queries such as:
+
+     ```
+     MATCH (n) RETURN n LIMIT 25;
+     MATCH p=()-[:REL]->() RETURN p LIMIT 25;
+     MATCH (a)-[r:REL]->(b) RETURN a.name, r.verb, b.name;
+     ```
+
+   - Explore and visualize your knowledge graph!
+
+---
+
+
+## 11. Summary
 
 - **This project provides both entropy-based unsupervised and GNN-based supervised approaches to sentence boundary detection in KGs.**
 - **Make sure to always activate your virtual environment before running any scripts.**
