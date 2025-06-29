@@ -4,12 +4,17 @@ import numpy as np
 from node2vec import Node2Vec
 import networkx as nx
 import os
+import ast
 
 def save_embeddings(embeddings, idx2node, output_prefix):
+    """
+    Save embeddings as .npy and nodes as .txt (with repr to preserve formatting).
+    """
     np.save(f"{output_prefix}.npy", embeddings)
     with open(f"{output_prefix}_nodes.txt", "w", encoding="utf-8") as f:
         for node in idx2node:
-            f.write(f"{node}\n")
+            # Using repr to preserve any special characters/newlines in node names
+            f.write(repr(node) + "\n")
 
 def main():
     parser = argparse.ArgumentParser(description="Generate node2vec embeddings from a knowledge graph.")

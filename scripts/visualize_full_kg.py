@@ -17,7 +17,7 @@ nx.draw(
     edge_color='gray', node_size=2000, font_size=9, alpha=0.85
 )
 
-# Draw edge labels if your edges have a 'verb' or 'label' attribute
+# Draw edge labels if edges have a 'verb' or 'label' attribute
 edge_attr = 'verb' if all('verb' in d for _,_,d in G.edges(data=True)) else (
     'label' if all('label' in d for _,_,d in G.edges(data=True)) else None
 )

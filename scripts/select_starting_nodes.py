@@ -5,6 +5,7 @@ import argparse
 import numpy as np
 import os
 import sys
+import ast
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 try:
@@ -22,7 +23,6 @@ def load_graph(path):
 def select_top_degree_nodes(G, n=3):
     """
     Select the top n nodes with the highest degree in the graph.
-    These are often central/important nodes in the KG.
     """
     degree_sorted = sorted(G.degree, key=lambda x: x[1], reverse=True)
     return [node for node, degree in degree_sorted[:n]]
@@ -40,7 +40,7 @@ def load_embeddings(emb_path, nodes_path):
     """
     embeddings = np.load(emb_path)
     with open(nodes_path, "r", encoding="utf-8") as f:
-        node_names = [line.strip() for line in f if line.strip()]
+        node_names = [ast.literal_eval(line) for line in f if line.strip()]
     node2idx = {n: i for i, n in enumerate(node_names)}
     return embeddings, node2idx
 
@@ -48,19 +48,22 @@ def select_high_entropy_nodes(G, n=3, emb_path=None, nodes_path=None, method="bl
     """
     Select n nodes with the highest entropy, as computed using the provided method.
     This uses node embeddings and the BLT (or cosine) entropy defined in src/entropy.py.
+    Only considers nodes that have corresponding embeddings.
     """
     if node_entropy is None or emb_path is None or nodes_path is None:
         raise ValueError("Entropy-based selection requires node embeddings and src/entropy.py.")
     embeddings, node2idx = load_embeddings(emb_path, nodes_path)
     entropy_dict = {}
     for node in G.nodes:
+        if node not in node2idx:
+            continue  # Skip nodes not present in the embedding mapping
         neighbors = set(G.successors(node)) | set(G.predecessors(node))
-        # Compute entropy for the node given its neighbors
         entropy = node_entropy(
             embeddings, node2idx, node, list(neighbors), method=method, temperature=temperature
         )
         entropy_dict[node] = entropy
-    # Sort nodes by entropy and select the top n
+    if not entropy_dict:
+        raise ValueError("No nodes with embeddings found in the graph!")
     entropy_sorted = sorted(entropy_dict.items(), key=lambda x: x[1], reverse=True)
     return [node for node, entropy in entropy_sorted[:n]]
 
