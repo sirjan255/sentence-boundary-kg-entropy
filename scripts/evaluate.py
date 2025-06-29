@@ -6,15 +6,32 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def load_boundaries(path):
+    import json
     with open(path, "r", encoding="utf-8") as f:
-        boundaries = json.load(f)
-    result = dict()
-    entropies = dict()
-    for k, v in boundaries.items():
-        # v: { "nodes_in_sentence": [...], "entropies": {node: entropy, ...} }
-        result[k] = set(v["nodes_in_sentence"])
-        entropies[k] = v.get("entropies", {})
-    return result, entropies
+        data = json.load(f)
+
+    # If data is a dict
+    if isinstance(data, dict):
+        result = {}
+        for k, v in data.items():
+            # Dict of dicts with 'nodes_in_sentence'
+            if isinstance(v, dict) and "nodes_in_sentence" in v:
+                result[k] = set(v["nodes_in_sentence"])
+            # Dict of lists (already just node names)
+            elif isinstance(v, list):
+                result[k] = set(v)
+            else:
+                # Unexpected value type, just coerce to set
+                result[k] = set([v])
+        return result, data
+
+    # If data is a list (flat list of node names)
+    elif isinstance(data, list):
+        # Treat as a single group with all boundaries
+        return {"all": set(data)}, data
+
+    else:
+        raise ValueError(f"Unknown boundaries format in {path}")
 
 def evaluate_sentence_grouping(pred, gold):
     """
