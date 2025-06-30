@@ -5,7 +5,7 @@ This project detects sentence boundaries in a knowledge graph (KG) derived from 
 ---
 
 ## Project Structure
-
+'''
 ├── .gitignore # Specifies files to be ignored by git
 ├── README.md # Project documentation and instructions
 ├── requirements.txt # Dependencies required for the project
@@ -43,7 +43,7 @@ This project detects sentence boundaries in a knowledge graph (KG) derived from 
   ├── entropy.py
   ├── kg_utils.py
   └── svo_extractor.py
-
+  '''
 
 ## 1. Python 3.11 Installation (Windows)
 
