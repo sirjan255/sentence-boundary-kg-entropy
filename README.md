@@ -359,7 +359,7 @@ You can use these embeddings for downstream tasks like clustering, visualization
 
 --- 
 
-## 12. Summary
+## 13. Summary
 
 - **This project provides both entropy-based unsupervised and GNN-based supervised approaches to sentence boundary detection in KGs.**
 - **Make sure to always activate your virtual environment before running any scripts.**
