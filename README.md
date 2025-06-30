@@ -269,8 +269,71 @@ This section guides you through running a demo knowledge graph using Neo4j and P
 
 ---
 
+## 11. Patch Classifier Training Demo
 
-## 11. Summary
+This section explains how to train the patch classifier model (regression on commit message word count) in your virtual environment. Follow the steps below:
+
+### 11.1 Create and Activate a Virtual Environment
+
+```sh
+python -m venv venv
+# On Windows:
+venv\Scripts\activate
+# On Mac/Linux:
+source venv/bin/activate
+```
+
+### 11.2 Install Required Packages
+
+Install the necessary dependencies inside your virtual environment:
+
+```sh
+pip install torch transformers scikit-learn pandas gitpython
+```
+
+### 11.3 Install `accelerate` (Required for HuggingFace Trainer)
+
+Install the `accelerate` package:
+
+```sh
+pip install accelerate
+```
+
+> **What does this command do?**  
+> `pip install accelerate` installs HuggingFace's Accelerate library, which is required to handle device placement (CPU/GPU) when training models using the HuggingFace Trainer API. Without it, you will get an ImportError.
+
+### 11.4 Run the Patch Classifier Training Script
+
+```sh
+python scripts/train_patch_classifier.py
+```
+
+---
+
+### 11.5 Expected Warnings and Logs (and why to ignore them)
+
+During training, you may see the following warnings and logs:
+
+- **Some weights of BertForSequenceClassification were not initialized...**  
+  _Reason:_ The classification layer is always randomly initialized; this is expected whenever you fine-tune BERT for a new task.  
+  _**Ignore this warning.**_
+
+- **You should probably TRAIN this model on a down-stream task...**  
+  _Reason:_ Just a reminder that you need to fine-tune the classifier head.  
+  _**Ignore this warning.**_
+
+- **UserWarning: 'pin_memory' argument is set as true but no accelerator is found...**  
+  _Reason:_ Pin memory is used for faster data transfer to GPU. If you are training on CPU, this has no effect and is safe to ignore.  
+  _**Ignore this warning.**_
+
+- **Progress bars (0% ... 100%)**  
+  _Reason:_ These are normal progress bars from the training process.  
+  _**Ignore/monitor as desired.**_
+
+---
+
+
+## 12. Summary
 
 - **This project provides both entropy-based unsupervised and GNN-based supervised approaches to sentence boundary detection in KGs.**
 - **Make sure to always activate your virtual environment before running any scripts.**
