@@ -17,3 +17,5 @@ pandas             # (not required by current scripts, but useful for analysis a
 scipy              # for softmax and entropy computation
 
 matplotlib         # for plotting entropy histograms in evaluation
+
+nebula3-python

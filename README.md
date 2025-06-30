@@ -4,6 +4,47 @@ This project detects sentence boundaries in a knowledge graph (KG) derived from 
 
 ---
 
+## Project Structure
+
+├── .gitignore # Specifies files to be ignored by git
+├── README.md # Project documentation and instructions
+├── requirements.txt # Dependencies required for the project
+├── data/
+│ ├── nodes_to_start.txt
+│ └── sample_text.txt # Sample text passages for processing
+├── notebooks/
+├── outputs/
+│ ├── boundaries.json
+│ ├── embeddings.npy
+│ ├── kg.pkl
+│ └── triplets.csv
+├── scripts/
+│ ├── build_kg.py
+│ ├── check_embeddings.py
+│ ├── convert_predicted_to_strings.py
+│ ├── demo_nebula_graph.py
+│ ├── demo_neo4j_graph.py
+│ ├── detect_sentence_boundary.py
+│ ├── entropy_traversal.py
+│ ├── evaluate.py
+│ ├── evaluate_boundaries.py
+│ ├── evaluate_boundaries_normalized.py
+│ ├── extract_svo.py
+│ ├── flatten_gold.py
+│ ├── generate_nodes_to_start.py
+│ ├── gnn_boundary_classifier.py
+│ ├── gnn_boundary_classifier_experiments.py
+│ ├── node2vec_embeddings.py
+│ ├── select_starting_nodes.py
+│ ├── train_patch_classifier.py
+│ ├── train_patch_embedding.py
+│ └── visualize_full_kg.py
+└── src/
+  ├── entropy.py
+  ├── kg_utils.py
+  └── svo_extractor.py
+
+
 ## 1. Python 3.11 Installation (Windows)
 
 > **Why Python 3.11?**  
