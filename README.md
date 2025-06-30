@@ -332,6 +332,32 @@ During training, you may see the following warnings and logs:
 
 ---
 
+## 12. Patch Embedding Training Demo
+
+This section explains how to train the patch embedding autoencoder on your repository's git commit history.
+
+### 12.1 Install Dependencies
+
+Make sure your virtual environment is activated, then run:
+```sh
+pip install torch transformers pandas gitpython scikit-learn
+```
+
+### 12.2 Run the Patch Embedding Script
+
+```sh
+python scripts/train_patch_embedding.py
+```
+
+This will:
+- Extract code diffs from your git commit history,
+- Train an autoencoder to learn patch embeddings,
+- Save the trained model to `./patch_embedding_output/patch_autoencoder.pt`,
+- Save the patch embeddings to `./patch_embedding_output/patch_embeddings.pkl`.
+
+You can use these embeddings for downstream tasks like clustering, visualization, or as features for other models.
+
+--- 
 
 ## 12. Summary
 
