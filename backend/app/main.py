@@ -13,6 +13,9 @@ from app.api import gnn_boundary_experiment
 from app.api import node2vec_embeddings
 from app.api import select_starting_nodes
 from app.api import patch_classifier
+from app.api import patch_embedding
+
+app = FastAPI()
 
 app.include_router(convert.router, prefix="/api", tags=["convert"])
 app.include_router(embeddings.router, prefix="/api", tags=["embeddings"])
@@ -28,6 +31,7 @@ app.include_router(gnn_boundary_experiment.router, prefix="/api", tags=["gnn"])
 app.include_router(node2vec_embeddings.router, prefix="/api", tags=["embeddings"])
 app.include_router(select_starting_nodes.router, prefix="/api", tags=["nodes"])
 app.include_router(patch_classifier.router, prefix="/api", tags=["patch-classifier"])
+app.include_router(patch_embedding.router, prefix="/api", tags=["patch-embedding"])
 from app.api import kg  
 
 app = FastAPI(
