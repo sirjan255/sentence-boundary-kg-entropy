@@ -15,6 +15,7 @@ from app.api import select_starting_nodes
 from app.api import patch_classifier
 from app.api import patch_embedding
 from app.api import kg_visualization
+from app.api import analytics_dashboard
 
 app = FastAPI()
 
@@ -34,6 +35,7 @@ app.include_router(select_starting_nodes.router, prefix="/api", tags=["nodes"])
 app.include_router(patch_classifier.router, prefix="/api", tags=["patch-classifier"])
 app.include_router(patch_embedding.router, prefix="/api", tags=["patch-embedding"])
 app.include_router(kg_visualization.router, prefix="/api", tags=["kg-visualization"])
+app.include_router(analytics_dashboard.router, prefix="/api", tags=["analytics-dashboard"])
 from app.api import kg  
 
 app = FastAPI(
