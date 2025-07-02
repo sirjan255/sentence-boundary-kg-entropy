@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "./ui/card";
+import { Progress } from "./ui/progress";
 import { Upload, Button, Alert, Spin, Table, Tag } from "antd";
 import { Target, Zap, TrendingUp } from "lucide-react";
 import { UploadOutlined } from "@ant-design/icons";
