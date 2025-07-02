@@ -11,6 +11,7 @@ from app.api import extract_svo
 from app.api import generate_nodes_to_start
 from app.api import gnn_boundary_experiment
 from app.api import node2vec_embeddings
+from app.api import select_starting_nodes
 
 app.include_router(convert.router, prefix="/api", tags=["convert"])
 app.include_router(embeddings.router, prefix="/api", tags=["embeddings"])
@@ -24,6 +25,7 @@ app.include_router(extract_svo.router, prefix="/api", tags=["svo"])
 app.include_router(generate_nodes_to_start.router, prefix="/api", tags=["svo"])
 app.include_router(gnn_boundary_experiment.router, prefix="/api", tags=["gnn"])
 app.include_router(node2vec_embeddings.router, prefix="/api", tags=["embeddings"])
+app.include_router(select_starting_nodes.router, prefix="/api", tags=["nodes"])
 from app.api import kg  
 
 app = FastAPI(
