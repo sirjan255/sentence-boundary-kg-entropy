@@ -1,0 +1,21 @@
+# Core scientific computing
+numpy              # for numerical computations and handling embeddings
+scikit-learn       # for cosine similarity and ML utilities
+
+# Natural Language Processing
+spacy              # for NLP and sentence boundary detection
+
+# Graph processing
+networkx           # for knowledge graph creation and manipulation
+
+# Node embeddings
+node2vec           # for node2vec random-walk graph embeddings
+
+# Data handling
+pandas             # (not required by current scripts, but useful for analysis and extensions)
+
+scipy              # for softmax and entropy computation
+
+matplotlib         # for plotting entropy histograms in evaluation
+
+nebula3-python
