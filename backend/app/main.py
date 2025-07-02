@@ -6,6 +6,7 @@ from app.api import neo4j
 from app.api import detect_sentence_boundary
 from app.api import entropy_traversal
 from app.api import evaluate_boundaries_normalized
+from app.api import evaluate
 
 app.include_router(convert.router, prefix="/api", tags=["convert"])
 app.include_router(embeddings.router, prefix="/api", tags=["embeddings"])
@@ -14,6 +15,7 @@ app.include_router(neo4j.router, prefix="/api", tags=["neo4j"])
 app.include_router(detect_sentence_boundary.router, prefix="/api", tags=["sentence_boundary"])
 app.include_router(entropy_traversal.router, prefix="/api", tags=["entropy_traversal"])
 app.include_router(evaluate_boundaries_normalized.router, prefix="/api", tags=["evaluation"])
+app.include_router(evaluate.router, prefix="/api", tags=["evaluation"])
 from app.api import kg  
 
 app = FastAPI(
