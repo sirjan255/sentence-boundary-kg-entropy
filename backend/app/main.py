@@ -1,6 +1,11 @@
 from fastapi.middleware.cors import CORSMiddleware
+from app.api import embeddings 
+from app.api import convert  
 
-from app.api import kg  # Import your router
+
+app.include_router(convert.router, prefix="/api", tags=["convert"])
+app.include_router(embeddings.router, prefix="/api", tags=["embeddings"])
+from app.api import kg  
 
 app = FastAPI(
     title="Sentence Boundary KG API",
