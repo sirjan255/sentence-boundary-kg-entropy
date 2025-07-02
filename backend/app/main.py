@@ -10,6 +10,7 @@ from app.api import evaluate
 from app.api import extract_svo
 from app.api import generate_nodes_to_start
 from app.api import gnn_boundary_experiment
+from app.api import node2vec_embeddings
 
 app.include_router(convert.router, prefix="/api", tags=["convert"])
 app.include_router(embeddings.router, prefix="/api", tags=["embeddings"])
@@ -22,6 +23,7 @@ app.include_router(evaluate.router, prefix="/api", tags=["evaluation"])
 app.include_router(extract_svo.router, prefix="/api", tags=["svo"])
 app.include_router(generate_nodes_to_start.router, prefix="/api", tags=["svo"])
 app.include_router(gnn_boundary_experiment.router, prefix="/api", tags=["gnn"])
+app.include_router(node2vec_embeddings.router, prefix="/api", tags=["embeddings"])
 from app.api import kg  
 
 app = FastAPI(
