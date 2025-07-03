@@ -2,6 +2,11 @@
 numpy              # for numerical computations and handling embeddings
 scikit-learn       # for cosine similarity and ML utilities
 
+# Web framework
+fastapi            # for API development
+uvicorn[standard]  # ASGI server for FastAPI
+python-multipart   # for file uploads
+
 # Natural Language Processing
 spacy              # for NLP and sentence boundary detection
 
