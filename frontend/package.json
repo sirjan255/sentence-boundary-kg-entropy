@@ -26,7 +26,8 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.11.30",
+    "@types/node": "^20.19.4",
+    "@types/papaparse": "^5.3.16",
     "@types/react": "^18.2.67",
     "@types/react-dom": "^18.2.19",
     "@types/react-router-dom": "^5.3.3",
