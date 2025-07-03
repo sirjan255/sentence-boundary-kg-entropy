@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "patch": "diff --git a/app.py b/app.py\n@@ -1 +1 @@\n-print('Hello World')\n+print('Hello FastAPI')"
+  },
+  {
+    "id": 2,
+    "patch": "diff --git a/utils.py b/utils.py\n@@ -2 +2 @@\n-def add(x, y):\n+def subtract(x, y):"
+  },
+  {
+    "id": 3,
+    "patch": "diff --git a/config.yaml b/config.yaml\n@@ -3 +3 @@\n-debug: true\n+debug: false"
+  },
+  {
+    "id": 4,
+    "patch": "diff --git a/main.py b/main.py\n@@ -10 +10 @@\n-return response\n+return jsonify(response)"
+  },
+  {
+    "id": 5,
+    "patch": "diff --git a/README.md b/README.md\n@@ -1 +1 @@\n-# Old Title\n+# New Title"
+  },
+  {
+    "id": 6,
+    "patch": "diff --git a/settings.py b/settings.py\n@@ -5 +5 @@\n-TIMEOUT = 10\n+TIMEOUT = 15"
+  },
+  {
+    "id": 7,
+    "patch": "diff --git a/server.js b/server.js\n@@ -1 +1 @@\n-console.log('Start')\n+console.log('Server Running')"
+  },
+  {
+    "id": 8,
+    "patch": "diff --git a/data.csv b/data.csv\n@@ -2 +2 @@\n-1,foo\n+1,bar"
+  },
+  {
+    "id": 9,
+    "patch": "diff --git a/db.py b/db.py\n@@ -8 +8 @@\n-conn.execute(query)\n+conn.run(query)"
+  },
+  {
+    "id": 10,
+    "patch": "diff --git a/style.css b/style.css\n@@ -1 +1 @@\n-body { background: white; }\n+body { background: #f0f0f0; }"
+  },
+  {
+    "id": 11,
+    "patch": "diff --git a/test_api.py b/test_api.py\n@@ -15 +15 @@\n-assert result == 1\n+assert result == 2"
+  },
+  {
+    "id": 12,
+    "patch": "diff --git a/logger.py b/logger.py\n@@ -6 +6 @@\n-print('Logging')\n+log.info('Logging')"
+  }
+]
