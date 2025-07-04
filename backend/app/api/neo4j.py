@@ -74,3 +74,40 @@ async def neo4j_upload_triplets(file: UploadFile = File(...)):
         return JSONResponse({"nodes": nodes, "edges": edges})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Neo4j ingestion failed: {str(e)}")
+
+@router.post("/neo4j/query/")
+async def neo4j_query(query: dict = Body(...)):
+    """
+    Accepts {"query": "<cypher>"} and returns {nodes, edges} for frontend visualization.
+    Only allows read (MATCH ... RETURN ...) queries!
+    """
+    cypher = query.get("query")
+    if not cypher:
+        raise HTTPException(status_code=400, detail="No query provided.")
+
+    try:
+        driver = get_driver()
+        with driver.session() as session:
+            result = session.run(cypher)
+            edges = []
+            nodes_set = set()
+            # Try to extract source, target, verb from result
+            for record in result:
+                # The record is a dict-like object
+                source = record.get("source")
+                target = record.get("target")
+                verb = record.get("verb")
+                # Only add edges if both source and target present
+                if source and target:
+                    edges.append({"source": source, "target": target, "verb": verb})
+                    nodes_set.update([source, target])
+                # If only a node is returned (e.g., single column query)
+                elif source and not target:
+                    nodes_set.add(source)
+                elif target and not source:
+                    nodes_set.add(target)
+            nodes = [{"id": n} for n in nodes_set]
+        driver.close()
+        return JSONResponse({"nodes": nodes, "edges": edges})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Cypher query failed: {str(e)}")
