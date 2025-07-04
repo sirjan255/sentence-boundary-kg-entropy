@@ -8,7 +8,6 @@ import { Target, Zap, TrendingUp } from "lucide-react";
 import { UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
 
-
 const BACKEND = process.env.REACT_APP_BACKEND || "/api";
 
 export function BoundaryEvaluationComponent() {
@@ -45,7 +44,6 @@ export function BoundaryEvaluationComponent() {
     }
   }
 
-  // Create metrics for pretty cards if result is available
   const metrics = result
     ? [
         {
@@ -72,10 +70,16 @@ export function BoundaryEvaluationComponent() {
       ]
     : [];
 
-  // Helper: Show arrays as tables or tags
   function renderArrayTable(title: string, arr: any[], color = "blue") {
     return (
-      <Card title={title} bordered={false} style={{ marginBottom: 24 }}>
+      <Card 
+        title={title} 
+        style={{ 
+          marginBottom: 24,
+          background: 'var(--background)',
+          borderColor: 'var(--border)'
+        }}
+      >
         {arr && arr.length > 0 ? (
           <Table
             dataSource={arr.map((n: string, idx: number) => ({
@@ -93,14 +97,20 @@ export function BoundaryEvaluationComponent() {
     );
   }
 
-  // Dynamic: Show all other (non-array) fields from result
   function renderOtherFields(obj: any) {
     if (!obj) return null;
     const skip = ["f1", "precision", "recall", "missing", "extra"];
     return Object.entries(obj)
       .filter(([k, v]) => !skip.includes(k) && !Array.isArray(v))
       .map(([k, v]) => (
-        <div key={k} style={{ fontWeight: 600, marginBottom: 8 }}>
+        <div 
+          key={k} 
+          style={{ 
+            fontWeight: 600, 
+            marginBottom: 8,
+            color: 'var(--foreground)'
+          }}
+        >
           {k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, " ")}:{" "}
           <span style={{ fontWeight: 400 }}>{String(v)}</span>
         </div>
@@ -108,45 +118,107 @@ export function BoundaryEvaluationComponent() {
   }
 
   return (
-    <div style={{ maxWidth: 700, margin: "0 auto", padding: 24 }}>
-      <Card title="Boundary Prediction Evaluation" bordered>
-        <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
-          <Upload
-            accept=".json"
-            beforeUpload={file => {
-              setGoldFile(file);
-              return false;
-            }}
-            showUploadList={false}
-          >
-            <Button icon={<UploadOutlined />}>
-              {goldFile ? `Gold: ${goldFile.name}` : "Select Gold File"}
-            </Button>
-          </Upload>
-          <Upload
-            accept=".json"
-            beforeUpload={file => {
-              setOutputFile(file);
-              return false;
-            }}
-            showUploadList={false}
-          >
-            <Button icon={<UploadOutlined />}>
-              {outputFile ? `Output: ${outputFile.name}` : "Select Output File"}
-            </Button>
-          </Upload>
+    <div style={{ 
+      maxWidth: 800, 
+      margin: "0 auto", 
+      padding: 24,
+      color: 'var(--foreground)'
+    }}>
+      <Card 
+        title="Boundary Prediction Evaluation" 
+        style={{ 
+          background: 'var(--background)',
+          borderColor: 'var(--border)'
+        }}
+      >
+        <div style={{ 
+          display: "flex", 
+          flexDirection: "column", 
+          gap: 16, 
+          marginBottom: 24 
+        }}>
+          <div style={{ 
+            display: "flex", 
+            gap: 16, 
+            alignItems: "center", 
+            flexWrap: "wrap" 
+          }}>
+            <Upload
+              accept=".json"
+              beforeUpload={file => {
+                setGoldFile(file);
+                return false;
+              }}
+              showUploadList={false}
+            >
+              <Button 
+                icon={<UploadOutlined />} 
+                style={{ 
+                  minWidth: 220,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  color: 'var(--foreground)',
+                  backgroundColor: 'var(--background)',
+                  borderColor: 'var(--border)'
+                }}
+              >
+                {goldFile ? `Gold: ${goldFile.name.slice(0, 15)}${goldFile.name.length > 15 ? '...' : ''}` : "Select Gold File"}
+              </Button>
+            </Upload>
+            <Upload
+              accept=".json"
+              beforeUpload={file => {
+                setOutputFile(file);
+                return false;
+              }}
+              showUploadList={false}
+            >
+              <Button 
+                icon={<UploadOutlined />} 
+                style={{ 
+                  minWidth: 220,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  color: 'var(--foreground)',
+                  backgroundColor: 'var(--background)',
+                  borderColor: 'var(--border)'
+                }}
+              >
+                {outputFile ? `Output: ${outputFile.name.slice(0, 15)}${outputFile.name.length > 15 ? '...' : ''}` : "Select Output File"}
+              </Button>
+            </Upload>
+          </div>
           <Button
             type="primary"
             onClick={handleEvaluate}
             disabled={!goldFile || !outputFile}
             loading={loading}
+            style={{ 
+              width: 220,
+              height: 40,
+              fontWeight: 500
+            }}
           >
             Evaluate
           </Button>
         </div>
 
         {error && (
-          <Alert type="error" message={error} style={{ marginBottom: 16 }} />
+          <Alert 
+            type="error" 
+            message={error} 
+            style={{ marginBottom: 16 }} 
+            closable 
+            onClose={() => setError(null)}
+          />
         )}
 
         {loading && <Spin style={{ marginBottom: 16 }} />}
@@ -177,7 +249,11 @@ export function BoundaryEvaluationComponent() {
                 );
               })}
             </div>
-            <Card style={{ marginTop: 24 }} bordered={false}>
+            <Card style={{ 
+              marginTop: 24,
+              background: 'var(--background)',
+              borderColor: 'var(--border)'
+            }}>
               {renderOtherFields(result)}
             </Card>
             {renderArrayTable("Missing Predictions", result.missing, "red")}
