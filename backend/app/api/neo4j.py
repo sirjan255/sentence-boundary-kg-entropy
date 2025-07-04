@@ -26,7 +26,7 @@ async def neo4j_upload_triplets(file: UploadFile = File(...)):
     """
     Accepts a CSV of triplets, loads into Neo4j, and returns nodes/edges as JSON for direct frontend visualization.
     """
-    if not file.filename.endswith(".csv"):
+    if file.filename and not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Please upload a .csv file.")
 
     try:
@@ -74,6 +74,8 @@ async def neo4j_upload_triplets(file: UploadFile = File(...)):
         return JSONResponse({"nodes": nodes, "edges": edges})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Neo4j ingestion failed: {str(e)}")
+
+from fastapi import Body
 
 @router.post("/neo4j/query/")
 async def neo4j_query(query: dict = Body(...)):
