@@ -31,30 +31,35 @@ import numpy as np
 from collections import deque
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from fastapi.responses import JSONResponse
-
-# Import node_entropy from your src/entropy.py
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
-try:
-    from entropy import node_entropy
-except ImportError:
-    raise ImportError("Could not import node_entropy from src/entropy.py. Please ensure it exists.")
+from entropy import node_entropy
 
 router = APIRouter()
 
-def load_embeddings_from_filelike(emb_file: UploadFile, nodes_file: UploadFile):
-    emb_buf = io.BytesIO(emb_file)
+def strip_quotes(s):
+    return s.strip().strip('"').strip("'")
+
+async def load_embeddings_from_filelike(emb_file: UploadFile, nodes_file: UploadFile):
+    # Read the uploaded files asynchronously
+    emb_bytes = await emb_file.read()
+    node_bytes = await nodes_file.read()
+    # Load embeddings from bytes
+    emb_buf = io.BytesIO(emb_bytes)
     embeddings = np.load(emb_buf)
-    nodes_file.seek(0)
-    node_names = [line.strip() for line in nodes_file.read().decode("utf-8").splitlines() if line.strip()]
-    node2idx = {n: i for i, n in enumerate(node_names)}
+    # Decode node names from bytes
+    node_names = [
+        line.strip() for line in node_bytes.decode("utf-8").splitlines() if line.strip()
+    ]
+    node2idx = {strip_quotes(n): i for i, n in enumerate(node_names)}
     idx2node = {i: n for n, i in node2idx.items()}
     return node2idx, idx2node, embeddings
 
-def load_start_nodes_from_filelike(start_nodes_file: UploadFile):
-    start_nodes_file.seek(0)
-    return [line.strip() for line in start_nodes_file.read().decode("utf-8").splitlines() if line.strip()]
+
+async def load_start_nodes_from_filelike(start_nodes_file: UploadFile):
+    file_bytes = await start_nodes_file.read()
+    return [
+        line.strip() for line in file_bytes.decode("utf-8").splitlines() if line.strip()
+    ]
+
 
 @router.post("/entropy_traversal/")
 async def entropy_traversal(
@@ -65,7 +70,7 @@ async def entropy_traversal(
     entropy_threshold: float = Form(0.8),
     max_depth: int = Form(10),
     entropy_method: str = Form("blt"),
-    temperature: float = Form(1.0)
+    temperature: float = Form(1.0),
 ):
     """
     Run entropy-based traversal for each start node.
@@ -77,19 +82,20 @@ async def entropy_traversal(
         G = pickle.loads(kg_bytes)
 
         # Load embeddings and nodes
-        emb_bytes = await embeddings.read()
-        node_bytes = await nodes.read()
-        node2idx, idx2node, embeddings_arr = load_embeddings_from_filelike(io.BytesIO(emb_bytes), io.BytesIO(node_bytes))
-
+        node2idx, idx2node, embeddings_arr = await load_embeddings_from_filelike(
+            embeddings, nodes
+        )
+        
         # Load starting nodes
-        start_nodes_bytes = await start_nodes.read()
-        start_nodes_list = load_start_nodes_from_filelike(io.BytesIO(start_nodes_bytes))
+        start_nodes_list = [strip_quotes(n) for n in await load_start_nodes_from_filelike(start_nodes)]
 
         results = {}
         for start in start_nodes_list:
             if start not in node2idx:
                 # Skip this start node, but tell the user
-                results[start] = {"error": f"Start node '{start}' not in node2idx, skipping."}
+                results[start] = {
+                    "error": f"Start node '{start}' not in node2idx, skipping."
+                }
                 continue
             visited = set()
             entropies = dict()
@@ -108,8 +114,12 @@ async def entropy_traversal(
                     if neigh in visited:
                         continue
                     entropy = node_entropy(
-                        embeddings_arr, node2idx, curr, [neigh],
-                        method=entropy_method, temperature=temperature
+                        embeddings_arr,
+                        node2idx,
+                        curr,
+                        [neigh],
+                        method=entropy_method,
+                        temperature=temperature,
                     )
                     entropies[neigh] = float(entropy)
                     if entropy < entropy_threshold:
@@ -122,4 +132,6 @@ async def entropy_traversal(
             }
         return JSONResponse(results)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Entropy traversal failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Entropy traversal failed: {str(e)}"
+        )
