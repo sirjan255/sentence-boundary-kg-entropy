@@ -133,11 +133,13 @@ export function EvaluateBoundariesNormalizedComponent() {
           marginBottom: 32,
           background: 'transparent'
         }}
-        bodyStyle={{
+        styles={{
+        body: {
           padding: 24,
           background: 'var(--ant-component-background)',
           borderRadius: 8
-        }}
+        }
+      }}
       >
         <Form layout="vertical" onFinish={handleSubmit}>
           {/* Upload: Predicted */}
@@ -208,9 +210,11 @@ export function EvaluateBoundariesNormalizedComponent() {
         <AntCard 
           title="Evaluation Metrics" 
           style={{ marginTop: 16 }}
-          bodyStyle={{
+          styles={{
+          body: {
             padding: 0
-          }}
+          }
+        }}
         >
           <Table
             dataSource={tableData}
@@ -226,11 +230,13 @@ export function EvaluateBoundariesNormalizedComponent() {
       <AntCard
         title="Where do I get the JSON files?"
         style={{ marginTop: 16 }}
-        bodyStyle={{
+        styles={{
+        body: {
           padding: 24,
           background: 'var(--ant-component-background)',
           borderRadius: 8
-        }}
+        }
+      }}
       >
         <ul>
           <li>
