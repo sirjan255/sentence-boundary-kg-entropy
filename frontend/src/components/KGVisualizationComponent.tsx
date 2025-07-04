@@ -24,7 +24,7 @@ import {
 import axios from "axios";
 
 // Backend API base URL
-const BACKEND = process.env.REACT_APP_BACKEND || "/api";
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
 const { Title, Paragraph, Text } = Typography;
 
 // Only allow pickle files for KG upload
@@ -63,11 +63,9 @@ export function KGVisualizationComponent() {
       formData.append("kg", kgFile);
 
       // POST to backend /visualize_kg/
-      const resp = await axios.post(
-        `${BACKEND}/visualize_kg/`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      const resp = await axios.post(`${BACKEND}/visualize_kg/`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       // Check if backend responded with image_b64
       if (resp.data && resp.data.image_b64) {
@@ -80,8 +78,8 @@ export function KGVisualizationComponent() {
       setError(
         String(
           err?.response?.data?.detail ||
-          err?.message ||
-          "Visualization failed. Please check your file format and try again."
+            err?.message ||
+            "Visualization failed. Please check your file format and try again."
         )
       );
     }
@@ -105,10 +103,12 @@ export function KGVisualizationComponent() {
         Knowledge Graph Visualization
       </Title>
       <Paragraph>
-        Upload a <b>pickled NetworkX graph</b> (<code>.pkl</code>) and generate a <b>PNG visualization</b> with node/edge/label info.
+        Upload a <b>pickled NetworkX graph</b> (<code>.pkl</code>) and generate
+        a <b>PNG visualization</b> with node/edge/label info.
         <br />
         <Text type="secondary">
-          (Edge labels use <code>verb</code> or <code>label</code> attributes if present.)
+          (Edge labels use <code>verb</code> or <code>label</code> attributes if
+          present.)
         </Text>
       </Paragraph>
       <Divider />
@@ -158,7 +158,8 @@ export function KGVisualizationComponent() {
           bordered
           title={
             <span>
-              <PictureOutlined style={{ color: "#52c41a" }} /> Graph PNG Visualization
+              <PictureOutlined style={{ color: "#52c41a" }} /> Graph PNG
+              Visualization
             </span>
           }
           style={{ marginBottom: 32, background: "#f8fff8" }}
@@ -190,28 +191,36 @@ export function KGVisualizationComponent() {
         </AntCard>
       )}
       {/* Help/How to use */}
-      <AntCard type="inner" title="How to use this tool" style={{ marginTop: 16 }}>
+      <AntCard
+        type="inner"
+        title="How to use this tool"
+        style={{ marginTop: 16 }}
+      >
         <ul>
           <li>
-            <b>Prepare a pickled NetworkX graph</b> (<code>Graph</code> or <code>DiGraph</code>) using Python's <code>pickle.dump()</code>.
+            <b>Prepare a pickled NetworkX graph</b> (<code>Graph</code> or{" "}
+            <code>DiGraph</code>) using Python's <code>pickle.dump()</code>.
           </li>
           <li>
             <b>Upload</b> your <code>.pkl</code> file using the button above.
           </li>
           <li>
-            <b>Click "Generate Visualization"</b> to render the full graph with labels.
+            <b>Click "Generate Visualization"</b> to render the full graph with
+            labels.
           </li>
           <li>
             <b>Download</b> the PNG or use it inline.
           </li>
           <li>
-            Edge labels will be shown if your graph has <code>verb</code> or <code>label</code> attributes.
+            Edge labels will be shown if your graph has <code>verb</code> or{" "}
+            <code>label</code> attributes.
           </li>
         </ul>
         <Divider />
         <Paragraph>
           <Text type="secondary">
-            <InfoCircleOutlined /> All computation is in-memory and secure. No files are saved on server.
+            <InfoCircleOutlined /> All computation is in-memory and secure. No
+            files are saved on server.
           </Text>
         </Paragraph>
       </AntCard>

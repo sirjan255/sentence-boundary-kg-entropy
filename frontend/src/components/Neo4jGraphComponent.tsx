@@ -40,8 +40,7 @@ const ForceGraph2D = dynamic(
   { ssr: false }
 );
 
-
-const BACKEND = process.env.REACT_APP_BACKEND || "/api";
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
 const { Title, Paragraph, Text } = Typography;
 
 type GraphNode = { id: string };
@@ -74,9 +73,14 @@ const EXAMPLE_QUERIES = [
 export function Neo4jGraphComponent() {
   // File and cypher query state
   const [tripletsFile, setTripletsFile] = useState<File | null>(null);
-  const [cypherQuery, setCypherQuery] = useState<string>(EXAMPLE_QUERIES[0].query);
+  const [cypherQuery, setCypherQuery] = useState<string>(
+    EXAMPLE_QUERIES[0].query
+  );
   // Graph state
-  const [graphData, setGraphData] = useState<{ nodes: GraphNode[]; edges: GraphEdge[] } | null>(null);
+  const [graphData, setGraphData] = useState<{
+    nodes: GraphNode[];
+    edges: GraphEdge[];
+  } | null>(null);
   // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -101,9 +105,13 @@ export function Neo4jGraphComponent() {
       const formData = new FormData();
       formData.append("file", tripletsFile);
       // POST to backend
-      const resp = await axios.post(`${BACKEND}/neo4j/upload_triplets/`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const resp = await axios.post(
+        `${BACKEND}/neo4j/upload_triplets/`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
       if (resp.data && resp.data.nodes && resp.data.edges) {
         setGraphData({
           nodes: resp.data.nodes,
@@ -161,7 +169,9 @@ export function Neo4jGraphComponent() {
   const handleExampleClick = (query: string) => {
     setCypherQuery(query);
     setGraphData(null);
-    message.info("Example query loaded! Click 'Run Query and Visualize' to see results.");
+    message.info(
+      "Example query loaded! Click 'Run Query and Visualize' to see results."
+    );
   };
 
   // UI rendering
@@ -172,7 +182,8 @@ export function Neo4jGraphComponent() {
         Neo4j SVO Graph Visualizer
       </Title>
       <Paragraph>
-        Upload an SVO triplet CSV, or run your own Cypher query, and see your knowledge graph instantly — <b>no Neo4j Browser or Studio required</b>!
+        Upload an SVO triplet CSV, or run your own Cypher query, and see your
+        knowledge graph instantly — <b>no Neo4j Browser or Studio required</b>!
       </Paragraph>
       <Divider />
       <AntCard bordered style={{ marginBottom: 32 }}>
@@ -183,7 +194,9 @@ export function Neo4jGraphComponent() {
           showUploadList={tripletsFile ? { showRemoveIcon: true } : false}
           maxCount={1}
           onRemove={() => setTripletsFile(null)}
-          fileList={tripletsFile ? [{ uid: "-1", name: tripletsFile.name }] : []}
+          fileList={
+            tripletsFile ? [{ uid: "-1", name: tripletsFile.name }] : []
+          }
         >
           <Space>
             <Button icon={<UploadOutlined />}>Upload Triplets CSV</Button>
@@ -227,7 +240,7 @@ export function Neo4jGraphComponent() {
         </div>
         <Input.TextArea
           value={cypherQuery}
-          onChange={e => setCypherQuery(e.target.value)}
+          onChange={(e) => setCypherQuery(e.target.value)}
           autoSize={{ minRows: 3, maxRows: 6 }}
           style={{ fontFamily: "monospace", marginBottom: 12 }}
           placeholder="Cypher query (e.g. MATCH (a:Entity)-[r:REL]->(b:Entity) RETURN ...)"
@@ -263,7 +276,15 @@ export function Neo4jGraphComponent() {
           }
           style={{ marginBottom: 32, background: "#f8fff8" }}
         >
-          <div style={{ width: "100%", height: 600, background: "#fff", border: "1px solid #eee", borderRadius: 10 }}>
+          <div
+            style={{
+              width: "100%",
+              height: 600,
+              background: "#fff",
+              border: "1px solid #eee",
+              borderRadius: 10,
+            }}
+          >
             <ForceGraph2D
               graphData={{
                 nodes: graphData.nodes,
@@ -287,25 +308,35 @@ export function Neo4jGraphComponent() {
         </AntCard>
       )}
       {/* How to use */}
-      <AntCard type="inner" title="How to use this tool" style={{ marginTop: 16 }}>
+      <AntCard
+        type="inner"
+        title="How to use this tool"
+        style={{ marginTop: 16 }}
+      >
         <ul>
           <li>
-            <b>Prepare your CSV:</b> Columns: <code>subject</code>, <code>verb</code>, <code>object</code>.
+            <b>Prepare your CSV:</b> Columns: <code>subject</code>,{" "}
+            <code>verb</code>, <code>object</code>.
           </li>
           <li>
-            <b>Upload</b> your CSV file and click "Upload and Visualize" to push the data to Neo4j and see the graph.
+            <b>Upload</b> your CSV file and click "Upload and Visualize" to push
+            the data to Neo4j and see the graph.
           </li>
           <li>
-            <b>Or run a custom Cypher query</b> (read-only) to visualize any part of your graph, or click an example above.
+            <b>Or run a custom Cypher query</b> (read-only) to visualize any
+            part of your graph, or click an example above.
           </li>
           <li>
-            <b>No local Neo4j Browser or Studio required:</b> All visualization happens here!
+            <b>No local Neo4j Browser or Studio required:</b> All visualization
+            happens here!
           </li>
         </ul>
         <Divider />
         <Paragraph>
           <Text type="secondary">
-            <InfoCircleOutlined /> All computation is in-memory and secure. No files are saved on server. Frontend never connects directly to Neo4j — backend does all DB access.
+            <InfoCircleOutlined /> All computation is in-memory and secure. No
+            files are saved on server. Frontend never connects directly to Neo4j
+            — backend does all DB access.
           </Text>
         </Paragraph>
       </AntCard>

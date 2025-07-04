@@ -30,7 +30,7 @@ This is the React frontend for the Boundary Evaluation App. It allows users to u
    If your backend is running elsewhere (e.g., `http://127.0.0.1:8000/api`), create a `.env` file in the frontend directory and set:
 
    ```
-   REACT_APP_BACKEND=http://127.0.0.1:8000/api
+   NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1:8000/api
    ```
 
 4. **Start the development server**

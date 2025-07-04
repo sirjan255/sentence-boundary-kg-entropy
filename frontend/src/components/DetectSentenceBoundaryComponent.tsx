@@ -1,18 +1,29 @@
 "use client";
 
 import React, { useState } from "react";
-import { Upload, Button, InputNumber, Select, Form, message, Spin, Card as AntCard, Table, Alert } from "antd";
+import {
+  Upload,
+  Button,
+  InputNumber,
+  Select,
+  Form,
+  message,
+  Spin,
+  Card as AntCard,
+  Table,
+  Alert,
+} from "antd";
 import { UploadOutlined, SearchOutlined } from "@ant-design/icons";
 import axios from "axios";
 
-// Backend endpoint; can be configured using REACT_APP_BACKEND or defaults to /api
-const BACKEND = process.env.REACT_APP_BACKEND || "/api";
+// Backend endpoint; can be configured using NEXT_PUBLIC_BACKEND_URL or defaults to /api
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
 
 // Entropy method options for the dropdown
 const ENTROPY_METHODS = [
   { label: "BLT", value: "blt" },
   { label: "Sum", value: "sum" },
-  { label: "Mean", value: "mean" }
+  { label: "Mean", value: "mean" },
 ];
 
 // Main component for detecting sentence boundaries
@@ -54,12 +65,14 @@ export function DetectSentenceBoundaryComponent() {
 
   // Handle form submission: validates inputs, sends POST request, parses results
   const handleSubmit = async () => {
-    setError(null);     // Clear previous errors
-    setResults(null);   // Clear previous results
+    setError(null); // Clear previous errors
+    setResults(null); // Clear previous results
 
     // Ensure all input files are provided
     if (!kgFile || !embeddingsFile || !nodesFile || !startsFile) {
-      setError("Please provide all required files (kg, embeddings, nodes, starts).");
+      setError(
+        "Please provide all required files (kg, embeddings, nodes, starts)."
+      );
       return;
     }
     setLoading(true); // Show spinner
@@ -77,9 +90,13 @@ export function DetectSentenceBoundaryComponent() {
       formData.append("max_nodes", maxNodes.toString());
 
       // POST request to backend endpoint
-      const resp = await axios.post(`${BACKEND}/detect_sentence_boundary/`, formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
+      const resp = await axios.post(
+        `${BACKEND}/detect_sentence_boundary/`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
       setResults(resp.data); // Save results for display
       message.success("Detection complete!"); // Show success message
@@ -87,8 +104,8 @@ export function DetectSentenceBoundaryComponent() {
       setError(
         String(
           err?.response?.data?.detail ||
-          err?.message ||
-          "Detection failed. Please make sure all files and parameters are correct."
+            err?.message ||
+            "Detection failed. Please make sure all files and parameters are correct."
         )
       );
     }
@@ -112,16 +129,21 @@ export function DetectSentenceBoundaryComponent() {
             dataSource={data.map((row: any, idx: number) => ({
               key: idx,
               node: row.node,
-              entropy: row.entropy
+              entropy: row.entropy,
             }))}
             columns={[
               { title: "Node", dataIndex: "node", key: "node" },
-              { title: "Entropy", dataIndex: "entropy", key: "entropy", render: (v: number) => v.toFixed(4) }
+              {
+                title: "Entropy",
+                dataIndex: "entropy",
+                key: "entropy",
+                render: (v: number) => v.toFixed(4),
+              },
             ]}
             pagination={false}
             size="small"
           />
-        ) : (data && typeof data === "object" && "error" in data) ? (
+        ) : data && typeof data === "object" && "error" in data ? (
           // Fix: Alert.message must be ReactNode, so always cast to string
           <Alert type="error" message={String(data.error)} />
         ) : (
@@ -151,9 +173,13 @@ export function DetectSentenceBoundaryComponent() {
           <Form.Item label="Node Embeddings (.npy)">
             <Upload
               beforeUpload={handleFileUpload(setEmbeddingsFile)}
-              showUploadList={embeddingsFile ? { showRemoveIcon: false } : false}
+              showUploadList={
+                embeddingsFile ? { showRemoveIcon: false } : false
+              }
               maxCount={1}
-              fileList={embeddingsFile ? [{ uid: "-2", name: embeddingsFile.name }] : []}
+              fileList={
+                embeddingsFile ? [{ uid: "-2", name: embeddingsFile.name }] : []
+              }
             >
               <Button icon={<UploadOutlined />}>Upload Embeddings</Button>
             </Upload>
@@ -175,30 +201,56 @@ export function DetectSentenceBoundaryComponent() {
               beforeUpload={handleFileUpload(setStartsFile)}
               showUploadList={startsFile ? { showRemoveIcon: false } : false}
               maxCount={1}
-              fileList={startsFile ? [{ uid: "-4", name: startsFile.name }] : []}
+              fileList={
+                startsFile ? [{ uid: "-4", name: startsFile.name }] : []
+              }
             >
               <Button icon={<UploadOutlined />}>Upload Start Nodes</Button>
             </Upload>
           </Form.Item>
           {/* Entropy threshold parameter */}
           <Form.Item label="Entropy Threshold">
-            <InputNumber value={entropyThreshold} min={0} max={5} step={0.01} onChange={handleEntropyThresholdChange} />
+            <InputNumber
+              value={entropyThreshold}
+              min={0}
+              max={5}
+              step={0.01}
+              onChange={handleEntropyThresholdChange}
+            />
           </Form.Item>
           {/* Entropy method dropdown */}
           <Form.Item label="Entropy Method">
-            <Select value={entropyMethod} onChange={setEntropyMethod} style={{ width: 160 }}>
-              {ENTROPY_METHODS.map(m => (
-                <Select.Option value={m.value} key={m.value}>{m.label}</Select.Option>
+            <Select
+              value={entropyMethod}
+              onChange={setEntropyMethod}
+              style={{ width: 160 }}
+            >
+              {ENTROPY_METHODS.map((m) => (
+                <Select.Option value={m.value} key={m.value}>
+                  {m.label}
+                </Select.Option>
               ))}
             </Select>
           </Form.Item>
           {/* Temperature parameter */}
           <Form.Item label="Temperature">
-            <InputNumber value={temperature} min={0.01} max={10} step={0.01} onChange={handleTemperatureChange} />
+            <InputNumber
+              value={temperature}
+              min={0.01}
+              max={10}
+              step={0.01}
+              onChange={handleTemperatureChange}
+            />
           </Form.Item>
           {/* Max nodes parameter */}
           <Form.Item label="Max Nodes to Traverse">
-            <InputNumber value={maxNodes} min={1} max={1000} step={1} onChange={handleMaxNodesChange} />
+            <InputNumber
+              value={maxNodes}
+              min={1}
+              max={1000}
+              step={1}
+              onChange={handleMaxNodesChange}
+            />
           </Form.Item>
           {/* Submit button */}
           <Form.Item>
@@ -214,11 +266,19 @@ export function DetectSentenceBoundaryComponent() {
           </Form.Item>
         </Form>
         {/* Show error if any */}
-        {error && <Alert type="error" message={String(error)} style={{ marginBottom: 16 }} />}
+        {error && (
+          <Alert
+            type="error"
+            message={String(error)}
+            style={{ marginBottom: 16 }}
+          />
+        )}
         {/* Show spinner if loading */}
         {loading && <Spin />}
         {/* Show results ("tables") after successful API call */}
-        {results && <div style={{ marginTop: 24 }}>{renderResultTables(results)}</div>}
+        {results && (
+          <div style={{ marginTop: 24 }}>{renderResultTables(results)}</div>
+        )}
       </AntCard>
     </div>
   );

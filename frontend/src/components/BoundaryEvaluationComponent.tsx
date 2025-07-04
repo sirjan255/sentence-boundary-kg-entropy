@@ -1,15 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "./ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "./ui/card";
 import { Progress } from "./ui/progress";
 import { Upload, Button, Alert, Spin, Table, Tag } from "antd";
 import { Target, Zap, TrendingUp } from "lucide-react";
 import { UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
 
-
-const BACKEND = process.env.REACT_APP_BACKEND || "/api";
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
 
 export function BoundaryEvaluationComponent() {
   const [goldFile, setGoldFile] = useState<File | null>(null);
@@ -113,7 +118,7 @@ export function BoundaryEvaluationComponent() {
         <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
           <Upload
             accept=".json"
-            beforeUpload={file => {
+            beforeUpload={(file) => {
               setGoldFile(file);
               return false;
             }}
@@ -125,7 +130,7 @@ export function BoundaryEvaluationComponent() {
           </Upload>
           <Upload
             accept=".json"
-            beforeUpload={file => {
+            beforeUpload={(file) => {
               setOutputFile(file);
               return false;
             }}

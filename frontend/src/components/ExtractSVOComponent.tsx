@@ -27,12 +27,19 @@ import {
 import axios from "axios";
 
 // Backend URL
-const BACKEND = process.env.REACT_APP_BACKEND || "/api";
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
 const { Title, Paragraph } = Typography;
 
 // File types supported for upload
 const ACCEPTED_FILE_TYPES = [
-  ".txt", ".pdf", ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif"
+  ".txt",
+  ".pdf",
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".bmp",
+  ".tiff",
+  ".gif",
 ];
 
 // CSV export utility function
@@ -86,13 +93,22 @@ export function ExtractSVOComponent() {
     }
     // Images: Use Tesseract.js for OCR
     if (
-      ["image/png", "image/jpeg", "image/jpg", "image/bmp", "image/tiff", "image/gif"].includes(file.type) ||
-      ACCEPTED_FILE_TYPES.some(ext => file.name.endsWith(ext))
+      [
+        "image/png",
+        "image/jpeg",
+        "image/jpg",
+        "image/bmp",
+        "image/tiff",
+        "image/gif",
+      ].includes(file.type) ||
+      ACCEPTED_FILE_TYPES.some((ext) => file.name.endsWith(ext))
     ) {
       const Tesseract = (await import("tesseract.js")).default;
       // Tesseract expects base64, URL, or HTMLImageElement, so create a blob URL
       const blobUrl = URL.createObjectURL(file);
-      const { data: { text } } = await Tesseract.recognize(blobUrl, "eng");
+      const {
+        data: { text },
+      } = await Tesseract.recognize(blobUrl, "eng");
       URL.revokeObjectURL(blobUrl);
       return text;
     }
@@ -125,10 +141,7 @@ export function ExtractSVOComponent() {
 
       if (file) {
         // Convert file to text if needed (images/pdf)
-        if (
-          file.type === "text/plain" ||
-          file.name.endsWith(".txt")
-        ) {
+        if (file.type === "text/plain" || file.name.endsWith(".txt")) {
           formData = new FormData();
           formData.append("text", file, file.name);
           dataSource = "file";
@@ -147,21 +160,20 @@ export function ExtractSVOComponent() {
       }
 
       // Backend API call
-      const resp = await axios.post(
-        `${BACKEND}/extract_svo/`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      const resp = await axios.post(`${BACKEND}/extract_svo/`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-      if (!Array.isArray(resp.data)) throw new Error("Malformed backend response.");
+      if (!Array.isArray(resp.data))
+        throw new Error("Malformed backend response.");
       setResult(resp.data);
       message.success("SVO extraction complete!");
     } catch (err: any) {
       setError(
         String(
           err?.response?.data?.detail ||
-          err?.message ||
-          "Extraction failed. Please check your file/text and try again."
+            err?.message ||
+            "Extraction failed. Please check your file/text and try again."
         )
       );
     }
@@ -194,7 +206,9 @@ export function ExtractSVOComponent() {
     <div style={{ maxWidth: 900, margin: "0 auto", padding: 24 }}>
       <Title level={2}>Extract SVO Triplets from Any Text</Title>
       <Paragraph>
-        Upload <b>any text, PDF, or image</b> file, or paste text below. SVO (Subject-Verb-Object) triplets will be extracted using spaCy on the backend. You can also download the results as CSV.
+        Upload <b>any text, PDF, or image</b> file, or paste text below. SVO
+        (Subject-Verb-Object) triplets will be extracted using spaCy on the
+        backend. You can also download the results as CSV.
       </Paragraph>
       <AntCard bordered style={{ marginBottom: 24 }}>
         <Form layout="vertical">
@@ -295,19 +309,27 @@ export function ExtractSVOComponent() {
         </Paragraph>
       </Modal>
       {/* Help Section */}
-      <AntCard type="inner" title="How to use this tool" style={{ marginTop: 16 }}>
+      <AntCard
+        type="inner"
+        title="How to use this tool"
+        style={{ marginTop: 16 }}
+      >
         <ul>
           <li>
-            <b>Upload a file</b>: Accepts plain text (.txt), PDF, or image files. For images/PDFs, OCR is applied automatically.
+            <b>Upload a file</b>: Accepts plain text (.txt), PDF, or image
+            files. For images/PDFs, OCR is applied automatically.
           </li>
           <li>
-            <b>Paste/type text</b>: You can also paste or type any raw text, which will override the uploaded file if both are present.
+            <b>Paste/type text</b>: You can also paste or type any raw text,
+            which will override the uploaded file if both are present.
           </li>
           <li>
-            <b>Extract</b>: Click "Extract SVO" to run extraction via the backend API.
+            <b>Extract</b>: Click "Extract SVO" to run extraction via the
+            backend API.
           </li>
           <li>
-            <b>Download CSV</b>: After extraction, download your SVO results for further analysis.
+            <b>Download CSV</b>: After extraction, download your SVO results for
+            further analysis.
           </li>
         </ul>
       </AntCard>

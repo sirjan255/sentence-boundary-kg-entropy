@@ -28,7 +28,7 @@ import {
 import axios from "axios";
 
 // Backend API base URL
-const BACKEND = process.env.REACT_APP_BACKEND || "/api";
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
 const { Title, Paragraph, Text } = Typography;
 
 // Only allow CSV files for triplets input
@@ -45,7 +45,6 @@ const ForceGraph2D = dynamic(
   { ssr: false }
 );
 
-
 // Graph node/edge types for TypeScript
 type GraphNode = { id: string };
 type GraphEdge = { source: string; target: string; verb?: string };
@@ -56,7 +55,10 @@ export function NebulaGraphUploadAndVisualizeComponent() {
   const [space, setSpace] = useState<string>("sentence_kg");
 
   // Graph data
-  const [graphData, setGraphData] = useState<{ nodes: GraphNode[]; edges: GraphEdge[] } | null>(null);
+  const [graphData, setGraphData] = useState<{
+    nodes: GraphNode[];
+    edges: GraphEdge[];
+  } | null>(null);
 
   // UI state
   const [loading, setLoading] = useState(false);
@@ -92,9 +94,13 @@ export function NebulaGraphUploadAndVisualizeComponent() {
       formData.append("space", space);
 
       // POST to backend /nebula/upload_triplets/
-      const resp = await axios.post(`${BACKEND}/nebula/upload_triplets/`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const resp = await axios.post(
+        `${BACKEND}/nebula/upload_triplets/`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
       if (resp.data && resp.data.nodes && resp.data.edges) {
         // Adapt nodes to {id: ...} for graph library
@@ -110,8 +116,8 @@ export function NebulaGraphUploadAndVisualizeComponent() {
       setError(
         String(
           err?.response?.data?.detail ||
-          err?.message ||
-          "Ingestion or visualization failed. Please check Nebula server and CSV formatting."
+            err?.message ||
+            "Ingestion or visualization failed. Please check Nebula server and CSV formatting."
         )
       );
     }
@@ -119,9 +125,7 @@ export function NebulaGraphUploadAndVisualizeComponent() {
   };
 
   // Helper: Create a table for nodes
-  const nodeColumns = [
-    { title: "Node", dataIndex: "id", key: "id" },
-  ];
+  const nodeColumns = [{ title: "Node", dataIndex: "id", key: "id" }];
   // Helper: Create a table for edges
   const edgeColumns = [
     {
@@ -152,9 +156,13 @@ export function NebulaGraphUploadAndVisualizeComponent() {
         Nebula Graph: SVO Triplet Ingestion & Visualization
       </Title>
       <Paragraph>
-        Upload a CSV file of SVO triplets (subject, verb, object) and instantly see your knowledge graph rendered, powered by a live Nebula Graph database.<br />
+        Upload a CSV file of SVO triplets (subject, verb, object) and instantly
+        see your knowledge graph rendered, powered by a live Nebula Graph
+        database.
+        <br />
         <Text type="secondary">
-          (No need for Nebula Studio: all ingestion and visualization is handled here!)
+          (No need for Nebula Studio: all ingestion and visualization is handled
+          here!)
         </Text>
       </Paragraph>
       <Divider />
@@ -165,7 +173,9 @@ export function NebulaGraphUploadAndVisualizeComponent() {
           showUploadList={tripletsFile ? { showRemoveIcon: true } : false}
           maxCount={1}
           onRemove={() => setTripletsFile(null)}
-          fileList={tripletsFile ? [{ uid: "-1", name: tripletsFile.name }] : []}
+          fileList={
+            tripletsFile ? [{ uid: "-1", name: tripletsFile.name }] : []
+          }
         >
           <Space>
             <Button icon={<UploadOutlined />}>Upload CSV (SVO Triplets)</Button>
@@ -218,7 +228,15 @@ export function NebulaGraphUploadAndVisualizeComponent() {
             </Button>
           }
         >
-          <div style={{ width: "100%", height: 600, background: "#fff", border: "1px solid #eee", borderRadius: 10 }}>
+          <div
+            style={{
+              width: "100%",
+              height: 600,
+              background: "#fff",
+              border: "1px solid #eee",
+              borderRadius: 10,
+            }}
+          >
             {/* Interactive Graph */}
             <ForceGraph2D
               graphData={{
@@ -245,7 +263,9 @@ export function NebulaGraphUploadAndVisualizeComponent() {
               onLinkClick={(_: any, link: any) => {
                 const idx = graphData.edges.findIndex(
                   (e) =>
-                    e.source === link.source && e.target === link.target && e.verb === link.verb
+                    e.source === link.source &&
+                    e.target === link.target &&
+                    e.verb === link.verb
                 );
                 if (idx >= 0) setModalEdgeIdx(idx);
               }}
@@ -264,11 +284,15 @@ export function NebulaGraphUploadAndVisualizeComponent() {
         {graphData && (
           <>
             <Paragraph>
-              <b>Nodes:</b> {graphData.nodes.length}, <b>Edges:</b> {graphData.edges.length}
+              <b>Nodes:</b> {graphData.nodes.length}, <b>Edges:</b>{" "}
+              {graphData.edges.length}
             </Paragraph>
             <Divider>Nodes</Divider>
             <Table
-              dataSource={graphData.nodes.map((node, idx) => ({ ...node, key: idx }))}
+              dataSource={graphData.nodes.map((node, idx) => ({
+                ...node,
+                key: idx,
+              }))}
               columns={nodeColumns}
               size="small"
               pagination={false}
@@ -305,30 +329,40 @@ export function NebulaGraphUploadAndVisualizeComponent() {
         )}
       </Modal>
       {/* How to use */}
-      <AntCard type="inner" title="How to use this tool" style={{ marginTop: 16 }}>
+      <AntCard
+        type="inner"
+        title="How to use this tool"
+        style={{ marginTop: 16 }}
+      >
         <ul>
           <li>
-            <b>Prepare your CSV:</b> Columns: <code>subject</code>, <code>verb</code>, <code>object</code>.
+            <b>Prepare your CSV:</b> Columns: <code>subject</code>,{" "}
+            <code>verb</code>, <code>object</code>.
           </li>
           <li>
             <b>Upload</b> your CSV file using the button above.
           </li>
           <li>
-            <b>Ingest and Visualize</b> to upload to Nebula Graph and instantly view your knowledge graph here.
+            <b>Ingest and Visualize</b> to upload to Nebula Graph and instantly
+            view your knowledge graph here.
           </li>
           <li>
-            <b>Preview</b> all nodes and edges, or click any edge in the graph for details.
+            <b>Preview</b> all nodes and edges, or click any edge in the graph
+            for details.
           </li>
         </ul>
         <Divider />
         <Paragraph>
           <Text type="secondary">
-            <InfoCircleOutlined /> All computation is in-memory and secure. No files are saved on server.
+            <InfoCircleOutlined /> All computation is in-memory and secure. No
+            files are saved on server.
           </Text>
         </Paragraph>
         <Divider />
         <Paragraph>
-          <b>Troubleshooting:</b> If you see a connection error, ensure Nebula Graph is running and API server can connect.<br />
+          <b>Troubleshooting:</b> If you see a connection error, ensure Nebula
+          Graph is running and API server can connect.
+          <br />
           No need to open Nebula Studio -- everything is handled here!
         </Paragraph>
       </AntCard>

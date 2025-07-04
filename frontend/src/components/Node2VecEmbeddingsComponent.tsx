@@ -30,7 +30,7 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 
-const BACKEND = process.env.REACT_APP_BACKEND || "/api";
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
 const { Title, Paragraph, Text } = Typography;
 
 export function Node2VecEmbeddingsComponent() {
@@ -86,15 +86,16 @@ export function Node2VecEmbeddingsComponent() {
     try {
       const formData = new FormData();
       formData.append("kg", kgFile);
-      Object.entries(formVals).forEach(([k, v]) => formData.append(k, String(v)));
+      Object.entries(formVals).forEach(([k, v]) =>
+        formData.append(k, String(v))
+      );
 
       const resp = await axios.post(
         `${BACKEND}/node2vec_embeddings/`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
-          responseType:
-            formVals.output_format === "zip" ? "blob" : "json",
+          responseType: formVals.output_format === "zip" ? "blob" : "json",
         }
       );
 
@@ -126,22 +127,40 @@ export function Node2VecEmbeddingsComponent() {
     if (!emb || !nodes) return null;
     const previewRows = nodes.slice(0, 10).map((n: string, i: number) => ({
       node: n,
-      embedding: emb[i].slice(0, 5).map((x: number) => Number(x).toFixed(3)).join(", ") + (emb[i].length > 5 ? " ..." : ""),
+      embedding:
+        emb[i]
+          .slice(0, 5)
+          .map((x: number) => Number(x).toFixed(3))
+          .join(", ") + (emb[i].length > 5 ? " ..." : ""),
       key: n,
     }));
     return (
-      <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 10 }}>
+      <table
+        style={{ width: "100%", borderCollapse: "collapse", marginTop: 10 }}
+      >
         <thead>
           <tr>
             <th style={{ border: "1px solid #eee", padding: 4 }}>Node</th>
-            <th style={{ border: "1px solid #eee", padding: 4 }}>Embedding (first 5 dims)</th>
+            <th style={{ border: "1px solid #eee", padding: 4 }}>
+              Embedding (first 5 dims)
+            </th>
           </tr>
         </thead>
         <tbody>
           {previewRows.map((row) => (
             <tr key={row.node}>
-              <td style={{ border: "1px solid #eee", padding: 4 }}>{row.node}</td>
-              <td style={{ border: "1px solid #eee", padding: 4, fontFamily: "monospace" }}>{row.embedding}</td>
+              <td style={{ border: "1px solid #eee", padding: 4 }}>
+                {row.node}
+              </td>
+              <td
+                style={{
+                  border: "1px solid #eee",
+                  padding: 4,
+                  fontFamily: "monospace",
+                }}
+              >
+                {row.embedding}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -157,7 +176,8 @@ export function Node2VecEmbeddingsComponent() {
         Generate node2vec Embeddings from Knowledge Graph
       </Title>
       <Paragraph>
-        Upload a <b>pickled NetworkX graph (.pkl)</b> and set node2vec parameters to generate node embeddings.
+        Upload a <b>pickled NetworkX graph (.pkl)</b> and set node2vec
+        parameters to generate node embeddings.
         <br />
         <Text type="secondary">
           No files are saved on server. All computation is in-memory.
@@ -201,24 +221,55 @@ export function Node2VecEmbeddingsComponent() {
             <InputNumber min={1} max={16} step={1} style={{ width: 100 }} />
           </Form.Item>
           <Form.Item label="Seed" name="seed">
-            <InputNumber min={0} max={1000000} step={1} style={{ width: 120 }} />
+            <InputNumber
+              min={0}
+              max={1000000}
+              step={1}
+              style={{ width: 120 }}
+            />
           </Form.Item>
-          <Form.Item label="p (return param)" name="p" tooltip="Return parameter (p)">
-            <InputNumber min={0.01} max={10} step={0.01} style={{ width: 100 }} />
+          <Form.Item
+            label="p (return param)"
+            name="p"
+            tooltip="Return parameter (p)"
+          >
+            <InputNumber
+              min={0.01}
+              max={10}
+              step={0.01}
+              style={{ width: 100 }}
+            />
           </Form.Item>
-          <Form.Item label="q (inout param)" name="q" tooltip="Inout parameter (q)">
-            <InputNumber min={0.01} max={10} step={0.01} style={{ width: 100 }} />
+          <Form.Item
+            label="q (inout param)"
+            name="q"
+            tooltip="Inout parameter (q)"
+          >
+            <InputNumber
+              min={0.01}
+              max={10}
+              step={0.01}
+              style={{ width: 100 }}
+            />
           </Form.Item>
           <Form.Item label="Directed" name="directed" valuePropName="checked">
             <Switch />
           </Form.Item>
-          <Form.Item label="Undirected" name="undirected" valuePropName="checked">
+          <Form.Item
+            label="Undirected"
+            name="undirected"
+            valuePropName="checked"
+          >
             <Switch />
           </Form.Item>
           <Form.Item label="Weighted" name="weighted" valuePropName="checked">
             <Switch />
           </Form.Item>
-          <Form.Item label="Normalize Embeddings" name="normalize" valuePropName="checked">
+          <Form.Item
+            label="Normalize Embeddings"
+            name="normalize"
+            valuePropName="checked"
+          >
             <Switch />
           </Form.Item>
           <Form.Item label="Output Format" name="output_format">
@@ -258,7 +309,8 @@ export function Node2VecEmbeddingsComponent() {
           style={{ marginBottom: 32, background: "#f8fff8" }}
           title={
             <span>
-              <DownloadOutlined style={{ color: "#52c41a" }} /> Download Embeddings
+              <DownloadOutlined style={{ color: "#52c41a" }} /> Download
+              Embeddings
             </span>
           }
         >
@@ -273,7 +325,8 @@ export function Node2VecEmbeddingsComponent() {
             Download Embeddings (.zip)
           </Button>
           <Paragraph>
-            Contains <code>embeddings.npy</code> (numpy array) and <code>embeddings_nodes.txt</code> (node names).
+            Contains <code>embeddings.npy</code> (numpy array) and{" "}
+            <code>embeddings_nodes.txt</code> (node names).
           </Paragraph>
         </AntCard>
       )}
@@ -288,7 +341,8 @@ export function Node2VecEmbeddingsComponent() {
         {jsonResult && (
           <>
             <Paragraph>
-              <b>Nodes:</b> {jsonResult.nodes.length}, <b>Dimensions:</b> {jsonResult.embeddings[0]?.length}
+              <b>Nodes:</b> {jsonResult.nodes.length}, <b>Dimensions:</b>{" "}
+              {jsonResult.embeddings[0]?.length}
             </Paragraph>
             <Divider>Sample (first 10 nodes)</Divider>
             {previewTable(jsonResult.embeddings, jsonResult.nodes)}
@@ -296,13 +350,18 @@ export function Node2VecEmbeddingsComponent() {
         )}
       </Modal>
       {/* How to use */}
-      <AntCard type="inner" title="How to use this tool" style={{ marginTop: 16 }}>
+      <AntCard
+        type="inner"
+        title="How to use this tool"
+        style={{ marginTop: 16 }}
+      >
         <ul>
           <li>
             <b>Prepare your KG:</b> Upload a pickled NetworkX graph (.pkl).
           </li>
           <li>
-            <b>Set node2vec parameters:</b> Adjust dimensions, walk length, p/q, etc.
+            <b>Set node2vec parameters:</b> Adjust dimensions, walk length, p/q,
+            etc.
           </li>
           <li>
             <b>Choose output:</b> Download as .zip or preview as JSON table.
@@ -314,7 +373,8 @@ export function Node2VecEmbeddingsComponent() {
         <Divider />
         <Paragraph>
           <Text type="secondary">
-            <InfoCircleOutlined /> All computation is in-memory. No files are saved on the server.
+            <InfoCircleOutlined /> All computation is in-memory. No files are
+            saved on the server.
           </Text>
         </Paragraph>
       </AntCard>
