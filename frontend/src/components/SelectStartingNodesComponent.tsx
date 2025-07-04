@@ -18,7 +18,7 @@ import {
   Tooltip,
   Tag,
   Collapse,
-  Descriptions,
+  theme,
 } from "antd";
 import {
   UploadOutlined,
@@ -30,17 +30,16 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
+const BACKEND = "http://localhost:8000/api";
 const { Title, Paragraph, Text } = Typography;
 const { Panel } = Collapse;
+const { useToken } = theme;
 
 export function SelectStartingNodesComponent() {
-  // --- State for file uploads and params ---
+  const { token } = useToken();
   const [kgFile, setKgFile] = useState<File | null>(null);
   const [embeddingsFile, setEmbeddingsFile] = useState<File | null>(null);
   const [nodesFile, setNodesFile] = useState<File | null>(null);
-
-  // Strategy and params
   const [strategy, setStrategy] = useState<
     "degree" | "random" | "entropy" | "all"
   >("degree");
@@ -48,25 +47,24 @@ export function SelectStartingNodesComponent() {
   const [entropyMethod, setEntropyMethod] = useState<string>("blt");
   const [temperature, setTemperature] = useState<number>(1.0);
   const [seed, setSeed] = useState<number>(42);
-
-  // Results and UI state
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // File upload handlers
   const handleKgUpload = (file: File) => {
     setKgFile(file);
     setResult(null);
     setError(null);
     return false;
   };
+
   const handleEmbeddingsUpload = (file: File) => {
     setEmbeddingsFile(file);
     setResult(null);
     setError(null);
     return false;
   };
+
   const handleNodesUpload = (file: File) => {
     setNodesFile(file);
     setResult(null);
@@ -74,7 +72,6 @@ export function SelectStartingNodesComponent() {
     return false;
   };
 
-  // Main submit handler
   const handleSubmit = async () => {
     setError(null);
     setResult(null);
@@ -127,7 +124,6 @@ export function SelectStartingNodesComponent() {
     setLoading(false);
   };
 
-  // Helper to display selected nodes for each strategy
   const renderNodeList = (nodes: any) => {
     if (!nodes) return null;
     if (Array.isArray(nodes)) {
@@ -150,26 +146,24 @@ export function SelectStartingNodesComponent() {
     return <span>{String(nodes)}</span>;
   };
 
-  // UI rendering
   return (
-    <div style={{ maxWidth: 880, margin: "0 auto", padding: 24 }}>
-      <Title level={2}>
-        <BulbOutlined style={{ color: "#1890ff", marginRight: 12 }} />
+    <div style={{ maxWidth: 880, margin: "0 auto", padding: 24, background: token.colorBgContainer }}>
+      <Title level={2} style={{ color: token.colorText }}>
+        <BulbOutlined style={{ color: token.colorPrimary, marginRight: 12 }} />
         Select Starting Nodes from Knowledge Graph
       </Title>
-      <Paragraph>
+      <Paragraph style={{ color: token.colorText }}>
         Upload a <b>pickled NetworkX graph</b> and select a node selection
         strategy.
         <br />
-        <Text type="secondary">
+        <Text type="secondary" style={{ color: token.colorTextSecondary }}>
           Strategies: top degree, random, entropy-based (needs embeddings), or
           all combined.
         </Text>
       </Paragraph>
-      <Divider />
-      <AntCard bordered style={{ marginBottom: 32 }}>
+      <Divider style={{ borderColor: token.colorBorder }} />
+      <AntCard bordered style={{ marginBottom: 32, background: token.colorBgContainer }}>
         <Form layout="vertical" onFinish={handleSubmit}>
-          {/* KG Upload */}
           <Form.Item label="Knowledge Graph (.pkl)">
             <Upload
               accept=".pkl"
@@ -182,7 +176,6 @@ export function SelectStartingNodesComponent() {
               <Button icon={<UploadOutlined />}>Upload KG</Button>
             </Upload>
           </Form.Item>
-          {/* Optional: embeddings and nodes for entropy */}
           <Form.Item
             label="Node Embeddings (.npy) [required for entropy]"
             extra="Required for entropy-based selection"
@@ -215,7 +208,6 @@ export function SelectStartingNodesComponent() {
               <Button icon={<UploadOutlined />}>Upload Node Names</Button>
             </Upload>
           </Form.Item>
-          {/* Strategy */}
           <Form.Item label="Node Selection Strategy" required>
             <Select
               value={strategy}
@@ -228,7 +220,6 @@ export function SelectStartingNodesComponent() {
               <Select.Option value="all">All (combined)</Select.Option>
             </Select>
           </Form.Item>
-          {/* Params */}
           <Form.Item label="Number of Nodes (per strategy)">
             <InputNumber
               min={1}
@@ -276,7 +267,6 @@ export function SelectStartingNodesComponent() {
               style={{ width: 120 }}
             />
           </Form.Item>
-          {/* Submit */}
           <Form.Item>
             <Button
               type="primary"
@@ -291,7 +281,6 @@ export function SelectStartingNodesComponent() {
             {loading && <Spin style={{ marginLeft: 16 }} />}
           </Form.Item>
         </Form>
-        {/* Error alert if any */}
         {error && (
           <Alert
             type="error"
@@ -301,18 +290,17 @@ export function SelectStartingNodesComponent() {
           />
         )}
       </AntCard>
-      {/* Results display */}
       {result && (
         <AntCard
           bordered
-          style={{ marginBottom: 32, background: "#f8fff8" }}
-          title="Selected Starting Nodes"
+          style={{ marginBottom: 32, background: token.colorBgContainer }}
+          title={<span style={{ color: token.colorText }}>Selected Starting Nodes</span>}
         >
           <Collapse defaultActiveKey={Object.keys(result)}>
             {Object.entries(result).map(([strategy, nodes]) => (
               <Panel
                 header={
-                  <span>
+                  <span style={{ color: token.colorText }}>
                     <Tag
                       color="blue"
                       style={{ fontWeight: "bold", fontSize: 16 }}
@@ -329,16 +317,15 @@ export function SelectStartingNodesComponent() {
           </Collapse>
         </AntCard>
       )}
-      {/* How to use */}
       <AntCard
         type="inner"
-        title="How to use this tool"
-        style={{ marginTop: 16 }}
+        title={<span style={{ color: token.colorText }}>How to use this tool</span>}
+        style={{ marginTop: 16, background: token.colorBgContainer }}
       >
-        <ul>
+        <ul style={{ color: token.colorText }}>
           <li>
             <b>Upload your Knowledge Graph:</b> Pickled NetworkX graph (
-            <code>.pkl</code>).
+            <code> .pkl</code>).
           </li>
           <li>
             <b>Optionally:</b> For entropy-based selection, also upload node
@@ -354,9 +341,9 @@ export function SelectStartingNodesComponent() {
             <b>View selected nodes</b> for each strategy below.
           </li>
         </ul>
-        <Divider />
-        <Paragraph>
-          <Text type="secondary">
+        <Divider style={{ borderColor: token.colorBorder }} />
+        <Paragraph style={{ color: token.colorText }}>
+          <Text type="secondary" style={{ color: token.colorTextSecondary }}>
             <InfoCircleOutlined /> No files are saved on server. All computation
             is in-memory.
           </Text>
@@ -365,10 +352,3 @@ export function SelectStartingNodesComponent() {
     </div>
   );
 }
-
-/*
-1. User uploads pickled KG, (optionally) node embeddings and node list.
-2. User picks strategy and parameters, and runs selection.
-3. Results show selected nodes per strategy in a friendly, interactive UI.
-4. Fully integrated with backend /select_starting_nodes/ endpoint.
-*/
