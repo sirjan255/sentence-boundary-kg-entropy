@@ -30,18 +30,30 @@ import {
 import axios from "axios";
 
 // Backend API URL (set via .env or fallback to /api)
-const BACKEND = process.env.REACT_APP_BACKEND || "/api";
+
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
+console.log(BACKEND);
 const { Title, Paragraph } = Typography;
 
 // Supported file types for upload
 const ACCEPTED_FILE_TYPES = [
-  ".txt", ".pdf", ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif"
+  ".txt",
+  ".pdf",
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".bmp",
+  ".tiff",
+  ".gif",
 ];
 
 // CSV export utility
 function toCSV(rows: string[]): string {
   // Just one column, each row is a node
-  return "subject\n" + rows.map(node => `"${(node ?? "").replace(/"/g, '""')}"`).join("\n");
+  return (
+    "subject\n" +
+    rows.map((node) => `"${(node ?? "").replace(/"/g, '""')}"`).join("\n")
+  );
 }
 
 export function GenerateNodesToStartComponent() {
@@ -80,12 +92,21 @@ export function GenerateNodesToStartComponent() {
     }
     // Images: OCR via Tesseract.js
     if (
-      ["image/png", "image/jpeg", "image/jpg", "image/bmp", "image/tiff", "image/gif"].includes(file.type) ||
-      ACCEPTED_FILE_TYPES.some(ext => file.name.endsWith(ext))
+      [
+        "image/png",
+        "image/jpeg",
+        "image/jpg",
+        "image/bmp",
+        "image/tiff",
+        "image/gif",
+      ].includes(file.type) ||
+      ACCEPTED_FILE_TYPES.some((ext) => file.name.endsWith(ext))
     ) {
       const Tesseract = (await import("tesseract.js")).default;
       const blobUrl = URL.createObjectURL(file);
-      const { data: { text } } = await Tesseract.recognize(blobUrl, "eng");
+      const {
+        data: { text },
+      } = await Tesseract.recognize(blobUrl, "eng");
       URL.revokeObjectURL(blobUrl);
       return text;
     }
@@ -138,15 +159,16 @@ export function GenerateNodesToStartComponent() {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      if (!Array.isArray(resp.data)) throw new Error("Malformed backend response.");
+      if (!Array.isArray(resp.data))
+        throw new Error("Malformed backend response.");
       setResult(resp.data);
       message.success("Starting nodes generated!");
     } catch (err: any) {
       setError(
         String(
           err?.response?.data?.detail ||
-          err?.message ||
-          "Extraction failed. Please check your file/text and try again."
+            err?.message ||
+            "Extraction failed. Please check your file/text and try again."
         )
       );
     }
@@ -207,8 +229,11 @@ export function GenerateNodesToStartComponent() {
     <div style={{ maxWidth: 900, margin: "0 auto", padding: 24 }}>
       <Title level={2}>Generate Starting Nodes from Text (SVO Subjects)</Title>
       <Paragraph>
-        Upload a <b>text, PDF, or image</b> file, or paste your text below. This tool extracts the <b>subject</b> of the first SVO (subject-verb-object) triplet in each sentence to generate a list of starting nodes. <br />
-        Use these nodes as entry points for graph traversal or sentence boundary evaluation!
+        Upload a <b>text, PDF, or image</b> file, or paste your text below. This
+        tool extracts the <b>subject</b> of the first SVO (subject-verb-object)
+        triplet in each sentence to generate a list of starting nodes. <br />
+        Use these nodes as entry points for graph traversal or sentence boundary
+        evaluation!
       </Paragraph>
       <AntCard variant="borderless" style={{ marginBottom: 24 }}>
         <Form layout="vertical">
@@ -272,10 +297,7 @@ export function GenerateNodesToStartComponent() {
               {/* Copy to clipboard */}
               {result.length > 0 && (
                 <Tooltip title="Copy all nodes to clipboard">
-                  <Button
-                    icon={<CopyOutlined />}
-                    onClick={handleCopy}
-                  >
+                  <Button icon={<CopyOutlined />} onClick={handleCopy}>
                     Copy
                   </Button>
                 </Tooltip>
@@ -327,22 +349,30 @@ export function GenerateNodesToStartComponent() {
         </Paragraph>
       </Modal>
       {/* Help Section */}
-      <AntCard type="inner" title="How to use this tool" style={{ marginTop: 16 }}>
+      <AntCard
+        type="inner"
+        title="How to use this tool"
+        style={{ marginTop: 16 }}
+      >
         <ul>
           <li>
-            <b>Upload a file</b>: Accepts plain text (.txt), PDF, or image files. For images/PDFs, OCR is applied automatically.
+            <b>Upload a file</b>: Accepts plain text (.txt), PDF, or image
+            files. For images/PDFs, OCR is applied automatically.
           </li>
           <li>
-            <b>Paste/type text</b>: You can also paste or type any raw text, which will override the uploaded file if both are present.
+            <b>Paste/type text</b>: You can also paste or type any raw text,
+            which will override the uploaded file if both are present.
           </li>
           <li>
-            <b>Generate Nodes</b>: Click the button to extract SVO subjects from each sentence.
+            <b>Generate Nodes</b>: Click the button to extract SVO subjects from
+            each sentence.
           </li>
           <li>
             <b>Download CSV</b>: Save your node list as a CSV file.
           </li>
           <li>
-            <b>Copy</b>: Copy all nodes to your clipboard for use in other tools.
+            <b>Copy</b>: Copy all nodes to your clipboard for use in other
+            tools.
           </li>
         </ul>
       </AntCard>

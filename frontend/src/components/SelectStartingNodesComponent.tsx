@@ -30,7 +30,7 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 
-const BACKEND = process.env.REACT_APP_BACKEND || "/api";
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
 const { Title, Paragraph, Text } = Typography;
 const { Panel } = Collapse;
 
@@ -41,7 +41,9 @@ export function SelectStartingNodesComponent() {
   const [nodesFile, setNodesFile] = useState<File | null>(null);
 
   // Strategy and params
-  const [strategy, setStrategy] = useState<"degree" | "random" | "entropy" | "all">("degree");
+  const [strategy, setStrategy] = useState<
+    "degree" | "random" | "entropy" | "all"
+  >("degree");
   const [num, setNum] = useState<number>(3);
   const [entropyMethod, setEntropyMethod] = useState<string>("blt");
   const [temperature, setTemperature] = useState<number>(1.0);
@@ -81,8 +83,13 @@ export function SelectStartingNodesComponent() {
       setError("Please upload your Knowledge Graph pickle (.pkl) file.");
       return;
     }
-    if ((strategy === "entropy" || strategy === "all") && (!embeddingsFile || !nodesFile)) {
-      setError("Embeddings (.npy) and node list (.txt) are required for entropy-based selection.");
+    if (
+      (strategy === "entropy" || strategy === "all") &&
+      (!embeddingsFile || !nodesFile)
+    ) {
+      setError(
+        "Embeddings (.npy) and node list (.txt) are required for entropy-based selection."
+      );
       return;
     }
 
@@ -99,9 +106,13 @@ export function SelectStartingNodesComponent() {
       if (embeddingsFile) formData.append("embeddings", embeddingsFile);
       if (nodesFile) formData.append("nodes", nodesFile);
 
-      const resp = await axios.post(`${BACKEND}/select_starting_nodes/`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const resp = await axios.post(
+        `${BACKEND}/select_starting_nodes/`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
       setResult(resp.data);
       message.success("Node selection complete!");
     } catch (err: any) {
@@ -123,7 +134,11 @@ export function SelectStartingNodesComponent() {
       return (
         <Space wrap>
           {nodes.map((n: string, i: number) => (
-            <Tag key={i} color="geekblue" style={{ fontSize: 16, padding: "3px 12px" }}>
+            <Tag
+              key={i}
+              color="geekblue"
+              style={{ fontSize: 16, padding: "3px 12px" }}
+            >
               {n}
             </Tag>
           ))}
@@ -143,10 +158,12 @@ export function SelectStartingNodesComponent() {
         Select Starting Nodes from Knowledge Graph
       </Title>
       <Paragraph>
-        Upload a <b>pickled NetworkX graph</b> and select a node selection strategy.
+        Upload a <b>pickled NetworkX graph</b> and select a node selection
+        strategy.
         <br />
         <Text type="secondary">
-          Strategies: top degree, random, entropy-based (needs embeddings), or all combined.
+          Strategies: top degree, random, entropy-based (needs embeddings), or
+          all combined.
         </Text>
       </Paragraph>
       <Divider />
@@ -176,7 +193,9 @@ export function SelectStartingNodesComponent() {
               showUploadList={embeddingsFile ? { showRemoveIcon: true } : false}
               maxCount={1}
               onRemove={() => setEmbeddingsFile(null)}
-              fileList={embeddingsFile ? [{ uid: "-2", name: embeddingsFile.name }] : []}
+              fileList={
+                embeddingsFile ? [{ uid: "-2", name: embeddingsFile.name }] : []
+              }
             >
               <Button icon={<UploadOutlined />}>Upload Embeddings</Button>
             </Upload>
@@ -215,7 +234,9 @@ export function SelectStartingNodesComponent() {
               min={1}
               max={100}
               value={num}
-              onChange={(value) => { if (value !== null) setNum(value); }}
+              onChange={(value) => {
+                if (value !== null) setNum(value);
+              }}
               style={{ width: 100 }}
             />
           </Form.Item>
@@ -235,7 +256,9 @@ export function SelectStartingNodesComponent() {
                   max={10}
                   step={0.01}
                   value={temperature}
-                  onChange={(value) => { if (value !== null) setTemperature(value); }}
+                  onChange={(value) => {
+                    if (value !== null) setTemperature(value);
+                  }}
                   style={{ width: 100 }}
                 />
               </Form.Item>
@@ -247,7 +270,9 @@ export function SelectStartingNodesComponent() {
               max={1000000}
               step={1}
               value={seed}
-              onChange={(value) => { if (value !== null) setSeed(value); }}
+              onChange={(value) => {
+                if (value !== null) setSeed(value);
+              }}
               style={{ width: 120 }}
             />
           </Form.Item>
@@ -268,7 +293,12 @@ export function SelectStartingNodesComponent() {
         </Form>
         {/* Error alert if any */}
         {error && (
-          <Alert type="error" showIcon message={String(error)} style={{ marginTop: 16 }} />
+          <Alert
+            type="error"
+            showIcon
+            message={String(error)}
+            style={{ marginTop: 16 }}
+          />
         )}
       </AntCard>
       {/* Results display */}
@@ -283,7 +313,10 @@ export function SelectStartingNodesComponent() {
               <Panel
                 header={
                   <span>
-                    <Tag color="blue" style={{ fontWeight: "bold", fontSize: 16 }}>
+                    <Tag
+                      color="blue"
+                      style={{ fontWeight: "bold", fontSize: 16 }}
+                    >
                       {strategy.toUpperCase()}
                     </Tag>
                   </span>
@@ -297,13 +330,19 @@ export function SelectStartingNodesComponent() {
         </AntCard>
       )}
       {/* How to use */}
-      <AntCard type="inner" title="How to use this tool" style={{ marginTop: 16 }}>
+      <AntCard
+        type="inner"
+        title="How to use this tool"
+        style={{ marginTop: 16 }}
+      >
         <ul>
           <li>
-            <b>Upload your Knowledge Graph:</b> Pickled NetworkX graph (<code>.pkl</code>).
+            <b>Upload your Knowledge Graph:</b> Pickled NetworkX graph (
+            <code>.pkl</code>).
           </li>
           <li>
-            <b>Optionally:</b> For entropy-based selection, also upload node embeddings (<code>.npy</code>) and node list (<code>.txt</code>).
+            <b>Optionally:</b> For entropy-based selection, also upload node
+            embeddings (<code>.npy</code>) and node list (<code>.txt</code>).
           </li>
           <li>
             <b>Pick a strategy:</b> Degree, random, entropy, or all.
@@ -318,7 +357,8 @@ export function SelectStartingNodesComponent() {
         <Divider />
         <Paragraph>
           <Text type="secondary">
-            <InfoCircleOutlined /> No files are saved on server. All computation is in-memory.
+            <InfoCircleOutlined /> No files are saved on server. All computation
+            is in-memory.
           </Text>
         </Paragraph>
       </AntCard>

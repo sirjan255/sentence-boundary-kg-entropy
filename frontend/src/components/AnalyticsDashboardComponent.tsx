@@ -36,7 +36,7 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
   return window.btoa(binary);
 }
 
-const BACKEND = process.env.REACT_APP_BACKEND || "/api";
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
 
 function App() {
   // STATE

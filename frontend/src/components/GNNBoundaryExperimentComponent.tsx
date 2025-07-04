@@ -33,7 +33,7 @@ import {
 import axios from "axios";
 
 // Backend API URL (set via .env or fallback to /api)
-const BACKEND = process.env.REACT_APP_BACKEND || "/api";
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
 const { Title, Paragraph } = Typography;
 const { Panel } = Collapse;
 
@@ -72,7 +72,9 @@ export function GNNBoundaryExperimentComponent() {
 
     // Validate files
     if (!kgFile || !embeddingsFile || !nodesFile || !goldFile) {
-      setError("Please upload all required files: KG, embeddings, nodes, gold.");
+      setError(
+        "Please upload all required files: KG, embeddings, nodes, gold."
+      );
       return;
     }
     setLoading(true);
@@ -90,18 +92,22 @@ export function GNNBoundaryExperimentComponent() {
       formData.append("seeds", seeds);
       formData.append("runs_per_setting", runsPerSetting.toString());
 
-      const resp = await axios.post(`${BACKEND}/gnn_boundary_experiment/`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        timeout: 1000 * 60 * 10, // 10 min timeout for big experiments
-      });
+      const resp = await axios.post(
+        `${BACKEND}/gnn_boundary_experiment/`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          timeout: 1000 * 60 * 10, // 10 min timeout for big experiments
+        }
+      );
       setResult(resp.data);
       message.success("Experiment completed!");
     } catch (err: any) {
       setError(
         String(
           err?.response?.data?.detail ||
-          err?.message ||
-          "Experiment failed. Please check your files and parameters."
+            err?.message ||
+            "Experiment failed. Please check your files and parameters."
         )
       );
     }
@@ -110,7 +116,12 @@ export function GNNBoundaryExperimentComponent() {
 
   // --- Data for summary table ---
   const summaryColumns = [
-    { title: "Test Ratio", dataIndex: "test_ratio", key: "test_ratio", render: (v: number) => v.toFixed(2) },
+    {
+      title: "Test Ratio",
+      dataIndex: "test_ratio",
+      key: "test_ratio",
+      render: (v: number) => v.toFixed(2),
+    },
     { title: "Hidden Dim", dataIndex: "hidden_dim", key: "hidden_dim" },
     {
       title: "Avg Precision",
@@ -128,23 +139,57 @@ export function GNNBoundaryExperimentComponent() {
       title: "Avg F1",
       dataIndex: "avg_f1",
       key: "avg_f1",
-      render: (v: number) => <Statistic value={v} precision={3} valueStyle={{ color: "#52c41a" }} />,
+      render: (v: number) => (
+        <Statistic value={v} precision={3} valueStyle={{ color: "#52c41a" }} />
+      ),
     },
-    { title: "Avg Test Size", dataIndex: "avg_test_size", key: "avg_test_size" },
-    { title: "Avg Gold Test Count", dataIndex: "avg_gold_test_count", key: "avg_gold_test_count" },
+    {
+      title: "Avg Test Size",
+      dataIndex: "avg_test_size",
+      key: "avg_test_size",
+    },
+    {
+      title: "Avg Gold Test Count",
+      dataIndex: "avg_gold_test_count",
+      key: "avg_gold_test_count",
+    },
     { title: "Runs", dataIndex: "runs", key: "runs" },
   ];
 
   // --- Data for per-run details table ---
   const perRunColumns = [
-    { title: "Test Ratio", dataIndex: "test_ratio", key: "test_ratio", render: (v: number) => v.toFixed(2) },
+    {
+      title: "Test Ratio",
+      dataIndex: "test_ratio",
+      key: "test_ratio",
+      render: (v: number) => v.toFixed(2),
+    },
     { title: "Hidden Dim", dataIndex: "hidden_dim", key: "hidden_dim" },
     { title: "Seed", dataIndex: "seed", key: "seed" },
-    { title: "Precision", dataIndex: "precision", key: "precision", render: (v: number) => v.toFixed(3) },
-    { title: "Recall", dataIndex: "recall", key: "recall", render: (v: number) => v.toFixed(3) },
-    { title: "F1", dataIndex: "f1", key: "f1", render: (v: number) => <Tag color="green">{v.toFixed(3)}</Tag> },
+    {
+      title: "Precision",
+      dataIndex: "precision",
+      key: "precision",
+      render: (v: number) => v.toFixed(3),
+    },
+    {
+      title: "Recall",
+      dataIndex: "recall",
+      key: "recall",
+      render: (v: number) => v.toFixed(3),
+    },
+    {
+      title: "F1",
+      dataIndex: "f1",
+      key: "f1",
+      render: (v: number) => <Tag color="green">{v.toFixed(3)}</Tag>,
+    },
     { title: "Test Size", dataIndex: "test_size", key: "test_size" },
-    { title: "Gold Test Count", dataIndex: "gold_test_count", key: "gold_test_count" },
+    {
+      title: "Gold Test Count",
+      dataIndex: "gold_test_count",
+      key: "gold_test_count",
+    },
   ];
 
   // --- UI Rendering starts here ---
@@ -153,7 +198,9 @@ export function GNNBoundaryExperimentComponent() {
       <Title level={2}>GNN Boundary Classifier Experiments</Title>
       <Paragraph>
         <b>
-          Upload your Knowledge Graph data and gold boundaries, set hyperparameters, and run GNN boundary classification experiments using PyTorch Geometric.
+          Upload your Knowledge Graph data and gold boundaries, set
+          hyperparameters, and run GNN boundary classification experiments using
+          PyTorch Geometric.
         </b>
       </Paragraph>
       <Paragraph type="secondary">
@@ -192,9 +239,13 @@ export function GNNBoundaryExperimentComponent() {
             <Upload
               accept=".npy"
               beforeUpload={handleFileUpload(setEmbeddingsFile)}
-              showUploadList={embeddingsFile ? { showRemoveIcon: false } : false}
+              showUploadList={
+                embeddingsFile ? { showRemoveIcon: false } : false
+              }
               maxCount={1}
-              fileList={embeddingsFile ? [{ uid: "-2", name: embeddingsFile.name }] : []}
+              fileList={
+                embeddingsFile ? [{ uid: "-2", name: embeddingsFile.name }] : []
+              }
             >
               <Button icon={<UploadOutlined />}>Upload Embeddings</Button>
             </Upload>
@@ -315,11 +366,22 @@ export function GNNBoundaryExperimentComponent() {
 
       {/* Results display */}
       {result && (
-        <AntCard bordered title="Experiment Results" style={{ marginBottom: 32, background: "#f8fff8" }}>
+        <AntCard
+          bordered
+          title="Experiment Results"
+          style={{ marginBottom: 32, background: "#f8fff8" }}
+        >
           <Collapse defaultActiveKey={["summary", "perrun"]}>
             <Panel header="Summary (Averaged per Setting)" key="summary">
               <Table
-                dataSource={Array.isArray(result.summary) ? result.summary.map((row: any, i: number) => ({ ...row, key: i })) : []}
+                dataSource={
+                  Array.isArray(result.summary)
+                    ? result.summary.map((row: any, i: number) => ({
+                        ...row,
+                        key: i,
+                      }))
+                    : []
+                }
                 columns={summaryColumns}
                 pagination={false}
                 bordered
@@ -328,7 +390,14 @@ export function GNNBoundaryExperimentComponent() {
             </Panel>
             <Panel header="Per-run Details" key="perrun">
               <Table
-                dataSource={Array.isArray(result.runs) ? result.runs.map((row: any, i: number) => ({ ...row, key: i })) : []}
+                dataSource={
+                  Array.isArray(result.runs)
+                    ? result.runs.map((row: any, i: number) => ({
+                        ...row,
+                        key: i,
+                      }))
+                    : []
+                }
                 columns={perRunColumns}
                 pagination={{ pageSize: 20, showSizeChanger: true }}
                 bordered
@@ -338,32 +407,51 @@ export function GNNBoundaryExperimentComponent() {
             </Panel>
           </Collapse>
           <Divider />
-          <Descriptions title="Experiment Settings" bordered column={1} size="small">
+          <Descriptions
+            title="Experiment Settings"
+            bordered
+            column={1}
+            size="small"
+          >
             <Descriptions.Item label="Epochs">{epochs}</Descriptions.Item>
             <Descriptions.Item label="Learning Rate">{lr}</Descriptions.Item>
-            <Descriptions.Item label="Test Ratios">{testRatios}</Descriptions.Item>
-            <Descriptions.Item label="Hidden Dims">{hiddenDims}</Descriptions.Item>
+            <Descriptions.Item label="Test Ratios">
+              {testRatios}
+            </Descriptions.Item>
+            <Descriptions.Item label="Hidden Dims">
+              {hiddenDims}
+            </Descriptions.Item>
             <Descriptions.Item label="Seeds">{seeds}</Descriptions.Item>
-            <Descriptions.Item label="Runs/Setting">{runsPerSetting}</Descriptions.Item>
+            <Descriptions.Item label="Runs/Setting">
+              {runsPerSetting}
+            </Descriptions.Item>
           </Descriptions>
         </AntCard>
       )}
 
       {/* Help Section */}
-      <AntCard type="inner" title="How to use this tool" style={{ marginTop: 16 }}>
+      <AntCard
+        type="inner"
+        title="How to use this tool"
+        style={{ marginTop: 16 }}
+      >
         <ul>
           <li>
-            <b>Upload your files:</b> Upload KG (.pkl), embeddings (.npy), node names (.txt), and gold boundaries (.json).
+            <b>Upload your files:</b> Upload KG (.pkl), embeddings (.npy), node
+            names (.txt), and gold boundaries (.json).
           </li>
           <li>
-            <b>Set hyperparameters:</b> Adjust epochs, learning rate, test ratios, hidden dims, seeds, and runs per setting.
+            <b>Set hyperparameters:</b> Adjust epochs, learning rate, test
+            ratios, hidden dims, seeds, and runs per setting.
           </li>
           <li>
-            <b>Run Experiment:</b> Click the button to launch GNN training and evaluation. <br />
+            <b>Run Experiment:</b> Click the button to launch GNN training and
+            evaluation. <br />
             Each setting will be run multiple times for reliable metrics.
           </li>
           <li>
-            <b>View Results:</b> See a summary table (mean across runs/settings) and per-run details for all hyperparameter combinations.
+            <b>View Results:</b> See a summary table (mean across runs/settings)
+            and per-run details for all hyperparameter combinations.
           </li>
         </ul>
       </AntCard>

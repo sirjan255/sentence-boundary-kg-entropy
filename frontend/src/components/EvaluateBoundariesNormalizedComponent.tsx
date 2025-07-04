@@ -16,7 +16,7 @@ import {
 import { UploadOutlined, CheckCircleTwoTone } from "@ant-design/icons";
 import axios from "axios";
 
-const BACKEND = process.env.REACT_APP_BACKEND || "/api";
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
 const { Title, Paragraph } = Typography;
 
 // Main component for evaluating normalized sentence boundaries
@@ -72,8 +72,8 @@ export function EvaluateBoundariesNormalizedComponent() {
       setError(
         String(
           err?.response?.data?.detail ||
-          err?.message ||
-          "Evaluation failed. Please check your files and try again."
+            err?.message ||
+            "Evaluation failed. Please check your files and try again."
         )
       );
     }
@@ -120,26 +120,29 @@ export function EvaluateBoundariesNormalizedComponent() {
   return (
     <div style={{ maxWidth: 600, margin: "0 auto", padding: 24 }}>
       {/* Title and instructions */}
-      <Title level={3}>Evaluate Sentence Boundary Predictions (Normalized)</Title>
+      <Title level={3}>
+        Evaluate Sentence Boundary Predictions (Normalized)
+      </Title>
       <Paragraph>
-        Upload your <b>predicted</b> and <b>actual</b> sentence boundary files (in JSON format),
-        then click <b>Evaluate</b> to compute macro precision, recall, and F1-score. This tool
-        automatically normalizes noisy or variant keys/nodes.
+        Upload your <b>predicted</b> and <b>actual</b> sentence boundary files
+        (in JSON format), then click <b>Evaluate</b> to compute macro precision,
+        recall, and F1-score. This tool automatically normalizes noisy or
+        variant keys/nodes.
       </Paragraph>
 
       {/* Main form card - updated with proper dark mode styling */}
-      <AntCard 
-        style={{ 
+      <AntCard
+        style={{
           marginBottom: 32,
-          background: 'transparent'
+          background: "transparent",
         }}
         styles={{
-        body: {
-          padding: 24,
-          background: 'var(--ant-component-background)',
-          borderRadius: 8
-        }
-      }}
+          body: {
+            padding: 24,
+            background: "var(--ant-component-background)",
+            borderRadius: 8,
+          },
+        }}
       >
         <Form layout="vertical" onFinish={handleSubmit}>
           {/* Upload: Predicted */}
@@ -153,7 +156,9 @@ export function EvaluateBoundariesNormalizedComponent() {
               beforeUpload={handleFileUpload(setPredictedFile)}
               showUploadList={predictedFile ? { showRemoveIcon: false } : false}
               maxCount={1}
-              fileList={predictedFile ? [{ uid: "-1", name: predictedFile.name }] : []}
+              fileList={
+                predictedFile ? [{ uid: "-1", name: predictedFile.name }] : []
+              }
             >
               <Button icon={<UploadOutlined />}>Upload Predicted</Button>
             </Upload>
@@ -170,7 +175,9 @@ export function EvaluateBoundariesNormalizedComponent() {
               beforeUpload={handleFileUpload(setActualFile)}
               showUploadList={actualFile ? { showRemoveIcon: false } : false}
               maxCount={1}
-              fileList={actualFile ? [{ uid: "-2", name: actualFile.name }] : []}
+              fileList={
+                actualFile ? [{ uid: "-2", name: actualFile.name }] : []
+              }
             >
               <Button icon={<UploadOutlined />}>Upload Actual</Button>
             </Upload>
@@ -207,14 +214,14 @@ export function EvaluateBoundariesNormalizedComponent() {
 
       {/* Output metrics table */}
       {result && (
-        <AntCard 
-          title="Evaluation Metrics" 
+        <AntCard
+          title="Evaluation Metrics"
           style={{ marginTop: 16 }}
           styles={{
-          body: {
-            padding: 0
-          }
-        }}
+            body: {
+              padding: 0,
+            },
+          }}
         >
           <Table
             dataSource={tableData}
@@ -231,29 +238,37 @@ export function EvaluateBoundariesNormalizedComponent() {
         title="Where do I get the JSON files?"
         style={{ marginTop: 16 }}
         styles={{
-        body: {
-          padding: 24,
-          background: 'var(--ant-component-background)',
-          borderRadius: 8
-        }
-      }}
+          body: {
+            padding: 24,
+            background: "var(--ant-component-background)",
+            borderRadius: 8,
+          },
+        }}
       >
         <ul>
           <li>
-            <b>Predicted Boundaries</b>: This is the output from your boundary prediction model or algorithm, saved as a JSON file.
+            <b>Predicted Boundaries</b>: This is the output from your boundary
+            prediction model or algorithm, saved as a JSON file.
           </li>
           <li>
-            <b>Actual Boundaries (Ground Truth)</b>: This is the labeled/ground-truth data you wish to compare against, also as a JSON file.
+            <b>Actual Boundaries (Ground Truth)</b>: This is the
+            labeled/ground-truth data you wish to compare against, also as a
+            JSON file.
           </li>
           <li>
-            Both files should be in <code>{"{ ... }"}</code> JSON object format, with keys as sentence/group identifiers and values as lists of nodes/strings or <code>[{"{"}node: ...{"}"}]</code> objects.
+            Both files should be in <code>{"{ ... }"}</code> JSON object format,
+            with keys as sentence/group identifiers and values as lists of
+            nodes/strings or{" "}
+            <code>
+              [{"{"}node: ...{"}"}]
+            </code>{" "}
+            objects.
           </li>
         </ul>
       </AntCard>
     </div>
   );
 }
-
 
 /*
 1. Upload two JSON files:

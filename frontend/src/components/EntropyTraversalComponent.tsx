@@ -18,8 +18,7 @@ import {
 import { UploadOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import axios from "axios";
 
-
-const BACKEND = process.env.REACT_APP_BACKEND || "/api";
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
 const { Title, Paragraph } = Typography;
 const { Panel } = Collapse;
 
@@ -71,7 +70,9 @@ export function EntropyTraversalComponent() {
     setResults(null);
 
     if (!kgFile || !embeddingsFile || !nodesFile || !startNodesFile) {
-      setError("Please upload all required files: KG, embeddings, nodes, and start nodes.");
+      setError(
+        "Please upload all required files: KG, embeddings, nodes, and start nodes."
+      );
       return;
     }
 
@@ -98,8 +99,8 @@ export function EntropyTraversalComponent() {
       setError(
         String(
           err?.response?.data?.detail ||
-          err?.message ||
-          "Entropy traversal failed: check your files and parameters."
+            err?.message ||
+            "Entropy traversal failed: check your files and parameters."
         )
       );
     }
@@ -108,7 +109,12 @@ export function EntropyTraversalComponent() {
 
   // --- Type guards for result objects ---
   // Check if the value is a valid result object
-  function isNodeResultObject(data: any): data is { nodes_in_sentence: string[]; entropies: Record<string, number> } {
+  function isNodeResultObject(
+    data: any
+  ): data is {
+    nodes_in_sentence: string[];
+    entropies: Record<string, number>;
+  } {
     return (
       data &&
       typeof data === "object" &&
@@ -151,19 +157,23 @@ export function EntropyTraversalComponent() {
                 {/* List of nodes in sentence */}
                 <Paragraph>
                   <b>Nodes in Sentence:</b>{" "}
-                  {data.nodes_in_sentence.length > 0
-                    ? data.nodes_in_sentence.join(", ")
-                    : <i>None found</i>}
+                  {data.nodes_in_sentence.length > 0 ? (
+                    data.nodes_in_sentence.join(", ")
+                  ) : (
+                    <i>None found</i>
+                  )}
                 </Paragraph>
                 {/* Table of entropies */}
                 <Table
                   dataSource={
                     data.entropies
-                      ? Object.entries(data.entropies).map(([node, entropy], idx) => ({
-                          key: idx,
-                          node,
-                          entropy,
-                        }))
+                      ? Object.entries(data.entropies).map(
+                          ([node, entropy], idx) => ({
+                            key: idx,
+                            node,
+                            entropy,
+                          })
+                        )
                       : []
                   }
                   columns={[
@@ -181,7 +191,10 @@ export function EntropyTraversalComponent() {
                 />
               </>
             ) : (
-              <Alert type="warning" message="No valid result for this start node." />
+              <Alert
+                type="warning"
+                message="No valid result for this start node."
+              />
             )}
           </Panel>
         ))}
@@ -193,26 +206,34 @@ export function EntropyTraversalComponent() {
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: 24 }}>
       {/* Title and instructions */}
-      <Title level={2}>Entropy-Based Traversal for Sentence Boundary Detection</Title>
+      <Title level={2}>
+        Entropy-Based Traversal for Sentence Boundary Detection
+      </Title>
       <Paragraph>
-        <b>Upload your Knowledge Graph and related files below to run entropy-based sentence boundary detection.</b>
+        <b>
+          Upload your Knowledge Graph and related files below to run
+          entropy-based sentence boundary detection.
+        </b>
       </Paragraph>
       <Paragraph type="secondary">
         <ul>
           <li>
-            <b>Knowledge Graph (.pkl)</b>: A pickled NetworkX <code>DiGraph</code>.
+            <b>Knowledge Graph (.pkl)</b>: A pickled NetworkX{" "}
+            <code>DiGraph</code>.
           </li>
           <li>
             <b>Node Embeddings (.npy)</b>: Numpy array of node embeddings.
           </li>
           <li>
-            <b>Node Names (.txt)</b>: Plain text, one node name per line (order must match embeddings).
+            <b>Node Names (.txt)</b>: Plain text, one node name per line (order
+            must match embeddings).
           </li>
           <li>
             <b>Start Nodes (.txt)</b>: Plain text, one starting node per line.
           </li>
         </ul>
-        Optional: Adjust entropy threshold, max depth, entropy method, or temperature.
+        Optional: Adjust entropy threshold, max depth, entropy method, or
+        temperature.
       </Paragraph>
 
       {/* Input form for files and params */}
@@ -233,9 +254,13 @@ export function EntropyTraversalComponent() {
           <Form.Item label="Node Embeddings (.npy)">
             <Upload
               beforeUpload={handleFileUpload(setEmbeddingsFile)}
-              showUploadList={embeddingsFile ? { showRemoveIcon: false } : false}
+              showUploadList={
+                embeddingsFile ? { showRemoveIcon: false } : false
+              }
               maxCount={1}
-              fileList={embeddingsFile ? [{ uid: "-2", name: embeddingsFile.name }] : []}
+              fileList={
+                embeddingsFile ? [{ uid: "-2", name: embeddingsFile.name }] : []
+              }
             >
               <Button icon={<UploadOutlined />}>Upload Embeddings</Button>
             </Upload>
@@ -255,9 +280,13 @@ export function EntropyTraversalComponent() {
           <Form.Item label="Start Nodes (.txt)">
             <Upload
               beforeUpload={handleFileUpload(setStartNodesFile)}
-              showUploadList={startNodesFile ? { showRemoveIcon: false } : false}
+              showUploadList={
+                startNodesFile ? { showRemoveIcon: false } : false
+              }
               maxCount={1}
-              fileList={startNodesFile ? [{ uid: "-4", name: startNodesFile.name }] : []}
+              fileList={
+                startNodesFile ? [{ uid: "-4", name: startNodesFile.name }] : []
+              }
             >
               <Button icon={<UploadOutlined />}>Upload Start Nodes</Button>
             </Upload>
@@ -336,8 +365,8 @@ export function EntropyTraversalComponent() {
       {results && (
         <AntCard bordered title="Traversal Results">
           <Paragraph>
-            For each start node, you will see the traversed nodes (in the detected sentence)
-            and the entropy value at each step.
+            For each start node, you will see the traversed nodes (in the
+            detected sentence) and the entropy value at each step.
           </Paragraph>
           {renderResultPanels(results)}
         </AntCard>

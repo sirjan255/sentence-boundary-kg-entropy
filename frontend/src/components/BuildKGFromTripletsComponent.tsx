@@ -26,7 +26,7 @@ import {
 import axios from "axios";
 
 // Backend API base URL
-const BACKEND = process.env.REACT_APP_BACKEND || "/api";
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
 const { Title, Paragraph, Text } = Typography;
 
 // Only allow CSV files for triplets input
@@ -84,8 +84,8 @@ export function BuildKGFromTripletsComponent() {
       setError(
         String(
           err?.response?.data?.detail ||
-          err?.message ||
-          "KG construction failed. Please check your CSV file."
+            err?.message ||
+            "KG construction failed. Please check your CSV file."
         )
       );
     }
@@ -120,8 +120,8 @@ export function BuildKGFromTripletsComponent() {
       setPreviewError(
         String(
           err?.response?.data?.detail ||
-          err?.message ||
-          "Preview failed. Please check your CSV file."
+            err?.message ||
+            "Preview failed. Please check your CSV file."
         )
       );
     }
@@ -129,9 +129,7 @@ export function BuildKGFromTripletsComponent() {
   };
 
   // Table columns for preview
-  const nodeColumns = [
-    { title: "Node", dataIndex: "node", key: "node" },
-  ];
+  const nodeColumns = [{ title: "Node", dataIndex: "node", key: "node" }];
   const edgeColumns = [
     { title: "Source", dataIndex: "source", key: "source" },
     { title: "Verb", dataIndex: "verb", key: "verb" },
@@ -146,7 +144,9 @@ export function BuildKGFromTripletsComponent() {
         Build Knowledge Graph from SVO Triplets (CSV)
       </Title>
       <Paragraph>
-        Upload a <b>CSV file of SVO triplets</b> (subject, verb, object[, sentence]) and generate a <b>pickled Knowledge Graph</b> for downstream tasks. You can also preview the graph structure!
+        Upload a <b>CSV file of SVO triplets</b> (subject, verb, object[,
+        sentence]) and generate a <b>pickled Knowledge Graph</b> for downstream
+        tasks. You can also preview the graph structure!
       </Paragraph>
       <Divider />
       <AntCard bordered style={{ marginBottom: 32 }}>
@@ -156,7 +156,9 @@ export function BuildKGFromTripletsComponent() {
           showUploadList={tripletsFile ? { showRemoveIcon: true } : false}
           maxCount={1}
           onRemove={() => setTripletsFile(null)}
-          fileList={tripletsFile ? [{ uid: "-1", name: tripletsFile.name }] : []}
+          fileList={
+            tripletsFile ? [{ uid: "-1", name: tripletsFile.name }] : []
+          }
         >
           <Space>
             <Button icon={<UploadOutlined />}>Upload Triplets CSV</Button>
@@ -227,7 +229,8 @@ export function BuildKGFromTripletsComponent() {
             Download Pickled KG (.pkl)
           </Button>
           <Paragraph>
-            Use this .pkl file in your downstream graph experiments, visualizations, or traversal tools.
+            Use this .pkl file in your downstream graph experiments,
+            visualizations, or traversal tools.
           </Paragraph>
         </AntCard>
       )}
@@ -242,11 +245,14 @@ export function BuildKGFromTripletsComponent() {
         {previewData && (
           <>
             <Paragraph>
-              <b>Nodes:</b> {previewData.num_nodes}, <b>Edges:</b> {previewData.num_edges}
+              <b>Nodes:</b> {previewData.num_nodes}, <b>Edges:</b>{" "}
+              {previewData.num_edges}
             </Paragraph>
             <Divider>Nodes</Divider>
             <Table
-              dataSource={previewData.nodes.map((node: string, idx: number) => ({ node, key: idx }))}
+              dataSource={previewData.nodes.map(
+                (node: string, idx: number) => ({ node, key: idx })
+              )}
               columns={nodeColumns}
               size="small"
               pagination={false}
@@ -255,7 +261,10 @@ export function BuildKGFromTripletsComponent() {
             />
             <Divider>Edges</Divider>
             <Table
-              dataSource={previewData.edges.map((e: any, idx: number) => ({ ...e, key: idx }))}
+              dataSource={previewData.edges.map((e: any, idx: number) => ({
+                ...e,
+                key: idx,
+              }))}
               columns={edgeColumns}
               size="small"
               pagination={false}
@@ -266,10 +275,16 @@ export function BuildKGFromTripletsComponent() {
         )}
       </Modal>
       {/* How to use */}
-      <AntCard type="inner" title="How to use this tool" style={{ marginTop: 16 }}>
+      <AntCard
+        type="inner"
+        title="How to use this tool"
+        style={{ marginTop: 16 }}
+      >
         <ul>
           <li>
-            <b>Prepare your CSV:</b> Columns: <code>subject</code>, <code>verb</code>, <code>object</code> (optionally <code>sentence</code>).
+            <b>Prepare your CSV:</b> Columns: <code>subject</code>,{" "}
+            <code>verb</code>, <code>object</code> (optionally{" "}
+            <code>sentence</code>).
           </li>
           <li>
             <b>Upload</b> your CSV file using the button above.
@@ -278,7 +293,8 @@ export function BuildKGFromTripletsComponent() {
             <b>Preview Graph</b> to see nodes and edges before building.
           </li>
           <li>
-            <b>Build KG</b> to generate a pickled NetworkX DiGraph (.pkl) ready for any KG tool.
+            <b>Build KG</b> to generate a pickled NetworkX DiGraph (.pkl) ready
+            for any KG tool.
           </li>
           <li>
             <b>Download</b> the .pkl file for use in other apps or analysis.
@@ -287,7 +303,8 @@ export function BuildKGFromTripletsComponent() {
         <Divider />
         <Paragraph>
           <Text type="secondary">
-            <InfoCircleOutlined /> All computation is in-memory and secure. No files are saved on server.
+            <InfoCircleOutlined /> All computation is in-memory and secure. No
+            files are saved on server.
           </Text>
         </Paragraph>
       </AntCard>
