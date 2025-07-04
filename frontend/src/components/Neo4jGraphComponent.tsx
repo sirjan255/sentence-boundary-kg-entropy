@@ -31,10 +31,15 @@ import axios from "axios";
 
 // Dynamic import for react-force-graph (npm install react-force-graph)
 import dynamic from "next/dynamic";
+
 const ForceGraph2D = dynamic(
-  () => import("react-force-graph").then((mod) => mod.ForceGraph2D),
+  () =>
+    import("react-force-graph").then((mod) => ({
+      default: mod.ForceGraph2D,
+    })),
   { ssr: false }
 );
+
 
 const BACKEND = process.env.REACT_APP_BACKEND || "/api";
 const { Title, Paragraph, Text } = Typography;

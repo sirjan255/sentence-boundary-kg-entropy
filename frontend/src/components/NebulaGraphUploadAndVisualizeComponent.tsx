@@ -36,9 +36,15 @@ const ACCEPTED_FILE_TYPES = [".csv"];
 
 // d3-force-graph is a good zero-config choice
 import dynamic from "next/dynamic";
-const ForceGraph2D = dynamic(() => import("react-force-graph").then(mod => mod.ForceGraph2D), {
-  ssr: false,
-});
+
+const ForceGraph2D = dynamic(
+  () =>
+    import("react-force-graph").then((mod) => ({
+      default: mod.ForceGraph2D,
+    })),
+  { ssr: false }
+);
+
 
 // Graph node/edge types for TypeScript
 type GraphNode = { id: string };
