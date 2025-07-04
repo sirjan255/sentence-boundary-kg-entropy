@@ -33,10 +33,7 @@ import axios from "axios";
 import dynamic from "next/dynamic";
 
 const ForceGraph2D = dynamic(
-  () =>
-    import("react-force-graph").then((mod) => ({
-      default: mod.ForceGraph2D,
-    })),
+  () => import("react-force-graph-2d").then((mod) => mod.default),
   { ssr: false }
 );
 
@@ -303,6 +300,30 @@ export function Neo4jGraphComponent() {
               linkDirectionalParticles={2}
               linkDirectionalParticleWidth={2}
               linkDirectionalParticleColor={() => "#faad14"}
+              nodeCanvasObject={(node, ctx, globalScale) => {
+                // Draw default node circle
+                if (typeof node.x === "number" && typeof node.y === "number") {
+                  ctx.beginPath();
+                  ctx.arc(node.x, node.y, 8, 0, 2 * Math.PI, false);
+                  ctx.fillStyle = node.color || "#1890ff";
+                  ctx.shadowColor = "#000";
+                  ctx.shadowBlur = 2;
+                  ctx.fill();
+                  ctx.shadowBlur = 0;
+                  ctx.strokeStyle = "#fff";
+                  ctx.lineWidth = 1.5;
+                  ctx.stroke();
+
+                  // Draw label above the circle
+                  const label = String(node.id ?? "");
+                  const fontSize = 16 / globalScale;
+                  ctx.font = `${fontSize}px Sans-Serif`;
+                  ctx.textAlign = "center";
+                  ctx.textBaseline = "bottom";
+                  ctx.fillStyle = "#222";
+                  ctx.fillText(label, node.x, node.y - 10);
+                }
+              }}
             />
           </div>
         </AntCard>
