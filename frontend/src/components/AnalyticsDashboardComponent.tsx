@@ -455,470 +455,476 @@ function App() {
         Interactive Analytics Dashboard: Patches & Knowledge Graphs{" "}
         <BarChartOutlined />
       </Title>
-      <Tabs defaultActiveKey="1" type="card">
-        {/* TAB 1: PATCH EMBEDDING */}
-        <TabPane
-          tab={
-            <span>
-              <ProjectOutlined />
-              &nbsp; Patch Embedding
-            </span>
-          }
-          key="1"
+      <Tabs defaultActiveKey="1" type="card" items={[
+  {
+    key: "1",
+    label: (
+      <span>
+        <ProjectOutlined />
+        &nbsp; Patch Embedding
+      </span>
+    ),
+    children: (
+      <>
+        {trainError && (
+          <Alert
+            type="error"
+            message={trainError}
+            style={{ marginBottom: 16 }}
+          />
+        )}
+        {patchPollingError && (
+          <Alert
+            type="error"
+            message={patchPollingError}
+            style={{ marginBottom: 16 }}
+          />
+        )}
+        <Spin
+          spinning={trainLoading || patchPolling}
+          tip={patchPolling ? "Training in progress..." : "Training model..."}
         >
-          {trainError && (
-            <Alert
-              type="error"
-              message={trainError}
-              style={{ marginBottom: 16 }}
-            />
-          )}
-          {patchPollingError && (
-            <Alert
-              type="error"
-              message={patchPollingError}
-              style={{ marginBottom: 16 }}
-            />
-          )}
-          <Spin
-            spinning={trainLoading || patchPolling}
-            tip={patchPolling ? "Training in progress..." : "Training model..."}
+          <Form
+            layout="vertical"
+            onFinish={handleTrain}
+            initialValues={{
+              encoder_model: "bert-base-uncased",
+              embedding_dim: 128,
+              epochs: 5,
+              batch_size: 8,
+              max_length: 128,
+            }}
           >
-            <Form
-              layout="vertical"
-              onFinish={handleTrain}
-              initialValues={{
-                encoder_model: "bert-base-uncased",
-                embedding_dim: 128,
-                epochs: 5,
-                batch_size: 8,
-                max_length: 128,
-              }}
+            <Form.Item
+              label="Upload Patch Data (.csv/.json)"
+              valuePropName="file"
             >
-              <Form.Item
-                label="Upload Patch Data (.csv/.json)"
-                valuePropName="file"
+              <Upload
+                beforeUpload={handlePatchFile}
+                showUploadList={patchFile ? { showRemoveIcon: false } : false}
+                maxCount={1}
+                fileList={
+                  patchFile ? [{ uid: "-1", name: patchFile.name }] : []
+                }
               >
-                <Upload
-                  beforeUpload={handlePatchFile}
-                  showUploadList={patchFile ? { showRemoveIcon: false } : false}
-                  maxCount={1}
-                  fileList={
-                    patchFile ? [{ uid: "-1", name: patchFile.name }] : []
-                  }
-                >
-                  <Button icon={<UploadOutlined />}>Upload Patch File</Button>
-                </Upload>
-              </Form.Item>
-              <Form.Item label="Or Paste/Edit Patches (CSV/JSON/TSV)">
-                <TextArea
-                  rows={4}
-                  value={patchPaste}
-                  onChange={(e) => setPatchPaste(e.target.value)}
-                  placeholder="Paste CSV, JSON, or TSV here"
-                />
-              </Form.Item>
-              <Form.Item label="Encoder Model" name="encoder_model">
-                <Select>
-                  <Select.Option value="bert-base-uncased">
-                    bert-base-uncased
-                  </Select.Option>
-                  <Select.Option value="roberta-base">
-                    roberta-base
-                  </Select.Option>
-                  <Select.Option value="distilbert-base-uncased">
-                    distilbert-base-uncased
-                  </Select.Option>
-                </Select>
-              </Form.Item>
-              <Form.Item label="Embedding Dimension" name="embedding_dim">
-                <Input type="number" min={16} max={768} />
-              </Form.Item>
-              <Form.Item label="Epochs" name="epochs">
-                <Input type="number" min={1} max={25} />
-              </Form.Item>
-              <Form.Item label="Batch Size" name="batch_size">
-                <Input type="number" min={1} max={64} />
-              </Form.Item>
-              <Form.Item label="Max Patch Length" name="max_length">
-                <Input type="number" min={32} max={512} />
-              </Form.Item>
-              <Form.Item>
-                <Button type="primary" htmlType="submit" loading={trainLoading}>
-                  Train Model
-                </Button>
-              </Form.Item>
-            </Form>
-            {patchPolling && (
-              <Alert
-                type="info"
-                message="Training in progress. This may take several minutes. Please do not close the tab."
-                showIcon
-                style={{ marginTop: 16 }}
+                <Button icon={<UploadOutlined />}>Upload Patch File</Button>
+              </Upload>
+            </Form.Item>
+            <Form.Item label="Or Paste/Edit Patches (CSV/JSON/TSV)">
+              <TextArea
+                rows={4}
+                value={patchPaste}
+                onChange={(e) => setPatchPaste(e.target.value)}
+                placeholder="Paste CSV, JSON, or TSV here"
               />
-            )}
-            {embedResult && (
-              <div style={{ marginTop: 24 }}>
+            </Form.Item>
+            <Form.Item label="Encoder Model" name="encoder_model">
+              <Select>
+                <Select.Option value="bert-base-uncased">
+                  bert-base-uncased
+                </Select.Option>
+                <Select.Option value="roberta-base">
+                  roberta-base
+                </Select.Option>
+                <Select.Option value="distilbert-base-uncased">
+                  distilbert-base-uncased
+                </Select.Option>
+              </Select>
+            </Form.Item>
+            <Form.Item label="Embedding Dimension" name="embedding_dim">
+              <Input type="number" min={16} max={768} />
+            </Form.Item>
+            <Form.Item label="Epochs" name="epochs">
+              <Input type="number" min={1} max={25} />
+            </Form.Item>
+            <Form.Item label="Batch Size" name="batch_size">
+              <Input type="number" min={1} max={64} />
+            </Form.Item>
+            <Form.Item label="Max Patch Length" name="max_length">
+              <Input type="number" min={32} max={512} />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" loading={trainLoading}>
+                Train Model
+              </Button>
+            </Form.Item>
+          </Form>
+          {patchPolling && (
+            <Alert
+              type="info"
+              message="Training in progress. This may take several minutes. Please do not close the tab."
+              showIcon
+              style={{ marginTop: 16 }}
+            />
+          )}
+          {embedResult && (
+            <div style={{ marginTop: 24 }}>
+              <Card
+                title="Training Summary"
+                bordered
+                style={{ marginBottom: 24 }}
+              >
+                <p>
+                  <b>Model:</b> {embedResult.summary.encoder_model}
+                </p>
+                <p>
+                  <b>Embedding Dim:</b> {embedResult.summary.embedding_dim}
+                </p>
+                <p>
+                  <b>Epochs:</b> {embedResult.summary.epochs}
+                </p>
+                <p>
+                  <b>Batch Size:</b> {embedResult.summary.batch_size}
+                </p>
+                <p>
+                  <b>Max Length:</b> {embedResult.summary.max_length}
+                </p>
+                <p>
+                  <b>Final Loss:</b>{" "}
+                  {embedResult.summary.final_loss?.toFixed(4)}
+                </p>
+                <p>
+                  <b>Outlier Patch Indices:</b>{" "}
+                  {embedResult.summary.outliers?.join(", ") || "None"}
+                </p>
+              </Card>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 32 }}
+              >
                 <Card
-                  title="Training Summary"
-                  bordered
-                  style={{ marginBottom: 24 }}
-                >
-                  <p>
-                    <b>Model:</b> {embedResult.summary.encoder_model}
-                  </p>
-                  <p>
-                    <b>Embedding Dim:</b> {embedResult.summary.embedding_dim}
-                  </p>
-                  <p>
-                    <b>Epochs:</b> {embedResult.summary.epochs}
-                  </p>
-                  <p>
-                    <b>Batch Size:</b> {embedResult.summary.batch_size}
-                  </p>
-                  <p>
-                    <b>Max Length:</b> {embedResult.summary.max_length}
-                  </p>
-                  <p>
-                    <b>Final Loss:</b>{" "}
-                    {embedResult.summary.final_loss?.toFixed(4)}
-                  </p>
-                  <p>
-                    <b>Outlier Patch Indices:</b>{" "}
-                    {embedResult.summary.outliers?.join(", ") || "None"}
-                  </p>
-                </Card>
-                <div
-                  style={{ display: "flex", flexDirection: "column", gap: 32 }}
-                >
-                  <Card
-                    title="Loss Curve"
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {lossCurveUrl && (
-                      <img
-                        src={BACKEND + lossCurveUrl}
-                        alt="Loss Curve"
-                        style={{ border: "1px solid #ddd" }}
-                      />
-                    )}
-                  </Card>
-                  <Card
-                    title="UMAP Embedding"
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {umapUrl && (
-                      <img
-                        src={BACKEND + umapUrl}
-                        alt="UMAP"
-                        style={{ border: "1px solid #ddd" }}
-                      />
-                    )}
-                  </Card>
-                </div>
-                <Card
-                  title="Downloads"
+                  title="Loss Curve"
                   style={{
-                    marginTop: 32,
                     display: "flex",
                     flexDirection: "column",
-                    gap: 16,
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  <Button
-                    icon={<DownloadOutlined />}
-                    style={{ marginBottom: 8, width: "100%" }}
-                    onClick={() =>
-                      encoderUrl &&
-                      handleDownloadUrl(BACKEND + encoderUrl, "encoder.pt")
-                    }
-                    disabled={!encoderUrl}
-                  >
-                    Download Encoder
-                  </Button>
-                  <Button
-                    icon={<DownloadOutlined />}
-                    style={{ width: "100%" }}
-                    onClick={() =>
-                      embeddingsUrl &&
-                      handleDownloadUrl(
-                        BACKEND + embeddingsUrl,
-                        "patch_embeddings.npy"
-                      )
-                    }
-                    disabled={!embeddingsUrl}
-                  >
-                    Download Embeddings
-                  </Button>
+                  {lossCurveUrl && (
+                    <img
+                      src={BACKEND + lossCurveUrl}
+                      alt="Loss Curve"
+                      style={{ border: "1px solid #ddd" }}
+                    />
+                  )}
+                </Card>
+                <Card
+                  title="UMAP Embedding"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {umapUrl && (
+                    <img
+                      src={BACKEND + umapUrl}
+                      alt="UMAP"
+                      style={{ border: "1px solid #ddd" }}
+                    />
+                  )}
                 </Card>
               </div>
-            )}
-          </Spin>
-        </TabPane>
-
-        {/* TAB 2: PATCH EXPLAINABILITY */}
-        <TabPane
-          tab={
-            <span>
-              <BarChartOutlined />
-              &nbsp; Explainability
-            </span>
-          }
-          key="2"
-        >
-          {explainError && (
-            <Alert
-              type="error"
-              message={explainError}
-              style={{ marginBottom: 16 }}
-            />
-          )}
-          {explainPollingError && (
-            <Alert
-              type="error"
-              message={explainPollingError}
-              style={{ marginBottom: 16 }}
-            />
-          )}
-          <Spin
-            spinning={explainLoading || explainPolling}
-            tip={explainPolling ? "Computing token saliency..." : ""}
-          >
-            <Paragraph>
-              Highlight which tokens in a patch embedding contributed most.
-            </Paragraph>
-            <Button
-              onClick={handleExplain}
-              type="primary"
-              style={{ marginBottom: 16 }}
-            >
-              Compute Token Saliency
-            </Button>
-            {explainPolling && (
-              <Alert
-                type="info"
-                message="Explainability in progress. This may take several minutes. Please do not close the tab."
-                showIcon
-                style={{ marginTop: 16 }}
-              />
-            )}
-            {explainResult && (
-              <Card title="Token Saliency Explanations" bordered>
-                <Table
-                  dataSource={explainResult.map((row: any, idx: number) => ({
-                    ...row,
-                    idx,
-                  }))}
-                  columns={explainColumns}
-                  rowKey="idx"
-                  pagination={false}
-                  style={{ marginTop: 16, maxWidth: 700 }}
-                />
-              </Card>
-            )}
-            <Modal
-              open={modalVisible}
-              title="Token Importances"
-              onCancel={() => setModalVisible(false)}
-              footer={null}
-            >
-              <div style={{ fontFamily: "monospace", fontSize: 16 }}>
-                {modalTokens.map((t, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      background: `rgba(255,0,0,${Math.min(
-                        0.8,
-                        t.importance /
-                          Math.max(...modalTokens.map((x) => x.importance))
-                      )})`,
-                      marginRight: 4,
-                      padding: "2px 4px",
-                      borderRadius: 3,
-                      color: "#222",
-                    }}
-                  >
-                    {t.token}
-                  </span>
-                ))}
-              </div>
-            </Modal>
-          </Spin>
-        </TabPane>
-
-        {/* TAB 3: PATCH SIMILARITY */}
-        <TabPane
-          tab={
-            <span>
-              <SearchOutlined />
-              &nbsp; Patch Similarity
-            </span>
-          }
-          key="3"
-        >
-          {similarError && (
-            <Alert
-              type="error"
-              message={similarError}
-              style={{ marginBottom: 16 }}
-            />
-          )}
-          <Spin spinning={similarLoading} tip="Finding similar patches...">
-            <Paragraph>
-              Find similar patches using an embedding vector.
-            </Paragraph>
-            <Upload
-              beforeUpload={handleEmbeddingsFile}
-              showUploadList={
-                embeddingsFile ? { showRemoveIcon: false } : false
-              }
-              maxCount={1}
-              fileList={
-                embeddingsFile ? [{ uid: "-1", name: embeddingsFile.name }] : []
-              }
-            >
-              <Button icon={<UploadOutlined />}>
-                Upload Embeddings (.npy)
-              </Button>
-            </Upload>
-            <Input.TextArea
-              rows={1}
-              value={queryEmbedding}
-              onChange={(e) => setQueryEmbedding(e.target.value)}
-              placeholder="Paste query embedding (comma separated floats)"
-              style={{ margin: "12px 0" }}
-            />
-            <Button
-              type="primary"
-              onClick={handleSimilar}
-              style={{ marginBottom: 16 }}
-            >
-              Find Similar
-            </Button>
-            {similarResult && (
-              <Card title="Similarity Results" bordered>
-                <Table
-                  dataSource={similarResult.indices.map(
-                    (idx: number, i: number) => ({
-                      idx,
-                      similarity: similarResult.similarities[i],
-                    })
-                  )}
-                  columns={[
-                    { title: "Patch Index", dataIndex: "idx", key: "idx" },
-                    {
-                      title: "Cosine Similarity",
-                      dataIndex: "similarity",
-                      key: "similarity",
-                      render: (val: number) => val.toFixed(4),
-                    },
-                  ]}
-                  rowKey="idx"
-                  pagination={false}
-                  style={{ maxWidth: 400, marginTop: 16 }}
-                />
-              </Card>
-            )}
-          </Spin>
-        </TabPane>
-
-        {/* TAB 4: KNOWLEDGE GRAPH */}
-        <TabPane
-          tab={
-            <span>
-              <BarChartOutlined />
-              &nbsp; Knowledge Graph
-            </span>
-          }
-          key="4"
-        >
-          {kgError && (
-            <Alert
-              type="error"
-              message={kgError}
-              style={{ marginBottom: 16 }}
-            />
-          )}
-          <Spin spinning={kgLoading} tip="Visualizing knowledge graph...">
-            <Paragraph>
-              Visualize a knowledge graph (pickled NetworkX .pkl file).
-            </Paragraph>
-            <Upload
-              beforeUpload={handleKgFile}
-              showUploadList={kgFile ? { showRemoveIcon: false } : false}
-              maxCount={1}
-              fileList={kgFile ? [{ uid: "-1", name: kgFile.name }] : []}
-            >
-              <Button icon={<UploadOutlined />}>Upload KG (.pkl)</Button>
-            </Upload>
-            <Button
-              type="primary"
-              onClick={handleKgVisualize}
-              style={{ marginLeft: 14, marginBottom: 16 }}
-            >
-              Visualize
-            </Button>
-            {kgImg && (
               <Card
-                title="Knowledge Graph Visualization"
-                bordered
-                style={{ marginTop: 16 }}
+                title="Downloads"
+                style={{
+                  marginTop: 32,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 16,
+                }}
               >
-                <img
-                  src={`data:image/png;base64,${kgImg}`}
-                  alt="KG"
-                  style={{ width: 600, border: "1px solid #ddd" }}
-                />
+                <Button
+                  icon={<DownloadOutlined />}
+                  style={{ marginBottom: 8, width: "100%" }}
+                  onClick={() =>
+                    encoderUrl &&
+                    handleDownloadUrl(BACKEND + encoderUrl, "encoder.pt")
+                  }
+                  disabled={!encoderUrl}
+                >
+                  Download Encoder
+                </Button>
+                <Button
+                  icon={<DownloadOutlined />}
+                  style={{ width: "100%" }}
+                  onClick={() =>
+                    embeddingsUrl &&
+                    handleDownloadUrl(
+                      BACKEND + embeddingsUrl,
+                      "patch_embeddings.npy"
+                    )
+                  }
+                  disabled={!embeddingsUrl}
+                >
+                  Download Embeddings
+                </Button>
               </Card>
-            )}
-            {kgStats && (
-              <Card title="Graph Stats" bordered style={{ marginTop: 12 }}>
-                <pre style={{ background: "#f5f5f5", padding: 8 }}>
-                  {JSON.stringify(kgStats, null, 2)}
-                </pre>
-              </Card>
-            )}
-          </Spin>
-        </TabPane>
-
-        {/* TAB 5: ABOUT */}
-        <TabPane
-          tab={
-            <span>
-              <InfoCircleOutlined />
-              &nbsp; About
-            </span>
-          }
-          key="5"
+            </div>
+          )}
+        </Spin>
+      </>
+    )
+  },
+  {
+    key: "2",
+    label: (
+      <span>
+        <BarChartOutlined />
+        &nbsp; Explainability
+      </span>
+    ),
+    children: (
+      <>
+        {explainError && (
+          <Alert
+            type="error"
+            message={explainError}
+            style={{ marginBottom: 16 }}
+          />
+        )}
+        {explainPollingError && (
+          <Alert
+            type="error"
+            message={explainPollingError}
+            style={{ marginBottom: 16 }}
+          />
+        )}
+        <Spin
+          spinning={explainLoading || explainPolling}
+          tip={explainPolling ? "Computing token saliency..." : ""}
         >
           <Paragraph>
-            <b>Interactive Analytics Dashboard</b> for patch and knowledge graph
-            data. Upload your patch/graph files, train embeddings, analyze, and
-            explore with explainability and interactive visualizations.
+            Highlight which tokens in a patch embedding contributed most.
           </Paragraph>
+          <Button
+            onClick={handleExplain}
+            type="primary"
+            style={{ marginBottom: 16 }}
+          >
+            Compute Token Saliency
+          </Button>
+          {explainPolling && (
+            <Alert
+              type="info"
+              message="Explainability in progress. This may take several minutes. Please do not close the tab."
+              showIcon
+              style={{ marginTop: 16 }}
+            />
+          )}
+          {explainResult && (
+            <Card title="Token Saliency Explanations" bordered>
+              <Table
+                dataSource={explainResult.map((row: any, idx: number) => ({
+                  ...row,
+                  idx,
+                }))}
+                columns={explainColumns}
+                rowKey="idx"
+                pagination={false}
+                style={{ marginTop: 16, maxWidth: 700 }}
+              />
+            </Card>
+          )}
+          <Modal
+            open={modalVisible}
+            title="Token Importances"
+            onCancel={() => setModalVisible(false)}
+            footer={null}
+          >
+            <div style={{ fontFamily: "monospace", fontSize: 16 }}>
+              {modalTokens.map((t, i) => (
+                <span
+                  key={i}
+                  style={{
+                    background: `rgba(255,0,0,${Math.min(
+                      0.8,
+                      t.importance /
+                        Math.max(...modalTokens.map((x) => x.importance))
+                    )})`,
+                    marginRight: 4,
+                    padding: "2px 4px",
+                    borderRadius: 3,
+                    color: "#222",
+                  }}
+                >
+                  {t.token}
+                </span>
+              ))}
+            </div>
+          </Modal>
+        </Spin>
+      </>
+    )
+  },
+  {
+    key: "3",
+    label: (
+      <span>
+        <SearchOutlined />
+        &nbsp; Patch Similarity
+      </span>
+    ),
+    children: (
+      <>
+        {similarError && (
+          <Alert
+            type="error"
+            message={similarError}
+            style={{ marginBottom: 16 }}
+          />
+        )}
+        <Spin spinning={similarLoading} tip="Finding similar patches...">
           <Paragraph>
-            <b>Features:</b> Patch embedding training, loss/UMAP visualization,
-            patch similarity, anomaly/outlier detection, token-level
-            explainability, and knowledge graph stats/visuals.
+            Find similar patches using an embedding vector.
           </Paragraph>
+          <Upload
+            beforeUpload={handleEmbeddingsFile}
+            showUploadList={
+              embeddingsFile ? { showRemoveIcon: false } : false
+            }
+            maxCount={1}
+            fileList={
+              embeddingsFile ? [{ uid: "-1", name: embeddingsFile.name }] : []
+            }
+          >
+            <Button icon={<UploadOutlined />}>
+              Upload Embeddings (.npy)
+            </Button>
+          </Upload>
+          <Input.TextArea
+            rows={1}
+            value={queryEmbedding}
+            onChange={(e) => setQueryEmbedding(e.target.value)}
+            placeholder="Paste query embedding (comma separated floats)"
+            style={{ margin: "12px 0" }}
+          />
+          <Button
+            type="primary"
+            onClick={handleSimilar}
+            style={{ marginBottom: 16 }}
+          >
+            Find Similar
+          </Button>
+          {similarResult && (
+            <Card title="Similarity Results" bordered>
+              <Table
+                dataSource={similarResult.indices.map(
+                  (idx: number, i: number) => ({
+                    idx,
+                    similarity: similarResult.similarities[i],
+                  })
+                )}
+                columns={[
+                  { title: "Patch Index", dataIndex: "idx", key: "idx" },
+                  {
+                    title: "Cosine Similarity",
+                    dataIndex: "similarity",
+                    key: "similarity",
+                    render: (val: number) => val.toFixed(4),
+                  },
+                ]}
+                rowKey="idx"
+                pagination={false}
+                style={{ maxWidth: 400, marginTop: 16 }}
+              />
+            </Card>
+          )}
+        </Spin>
+      </>
+    )
+  },
+  {
+    key: "4",
+    label: (
+      <span>
+        <BarChartOutlined />
+        &nbsp; Knowledge Graph
+      </span>
+    ),
+    children: (
+      <>
+        {kgError && (
+          <Alert
+            type="error"
+            message={kgError}
+            style={{ marginBottom: 16 }}
+          />
+        )}
+        <Spin spinning={kgLoading} tip="Visualizing knowledge graph...">
           <Paragraph>
-            <b>Backend:</b> HuggingFace Transformers, NetworkX, UMAP,
-            IsolationForest, FastAPI.
-            <br />
-            <b>Frontend:</b> React + Ant Design.
+            Visualize a knowledge graph (pickled NetworkX .pkl file).
           </Paragraph>
-        </TabPane>
-      </Tabs>
+          <Upload
+            beforeUpload={handleKgFile}
+            showUploadList={kgFile ? { showRemoveIcon: false } : false}
+            maxCount={1}
+            fileList={kgFile ? [{ uid: "-1", name: kgFile.name }] : []}
+          >
+            <Button icon={<UploadOutlined />}>Upload KG (.pkl)</Button>
+          </Upload>
+          <Button
+            type="primary"
+            onClick={handleKgVisualize}
+            style={{ marginLeft: 14, marginBottom: 16 }}
+          >
+            Visualize
+          </Button>
+          {kgImg && (
+            <Card
+              title="Knowledge Graph Visualization"
+              bordered
+              style={{ marginTop: 16 }}
+            >
+              <img
+                src={`data:image/png;base64,${kgImg}`}
+                alt="KG"
+                style={{ width: 600, border: "1px solid #ddd" }}
+              />
+            </Card>
+          )}
+          {kgStats && (
+            <Card title="Graph Stats" bordered style={{ marginTop: 12 }}>
+              <pre style={{ background: "#f5f5f5", padding: 8 }}>
+                {JSON.stringify(kgStats, null, 2)}
+              </pre>
+            </Card>
+          )}
+        </Spin>
+      </>
+    )
+  },
+  {
+    key: "5",
+    label: (
+      <span>
+        <InfoCircleOutlined />
+        &nbsp; About
+      </span>
+    ),
+    children: (
+      <>
+        <Paragraph>
+          <b>Interactive Analytics Dashboard</b> for patch and knowledge graph
+          data. Upload your patch/graph files, train embeddings, analyze, and
+          explore with explainability and interactive visualizations.
+        </Paragraph>
+        <Paragraph>
+          <b>Features:</b> Patch embedding training, loss/UMAP visualization,
+          patch similarity, anomaly/outlier detection, token-level
+          explainability, and knowledge graph stats/visuals.
+        </Paragraph>
+        <Paragraph>
+          <b>Backend:</b> HuggingFace Transformers, NetworkX, UMAP,
+          IsolationForest, FastAPI.
+          <br />
+          <b>Frontend:</b> React + Ant Design.
+        </Paragraph>
+      </>
+    )
+  }
+]} />
     </div>
   );
 }
