@@ -18,6 +18,7 @@ import {
   Tooltip,
   Modal,
   Radio,
+  theme,
 } from "antd";
 import {
   UploadOutlined,
@@ -30,11 +31,12 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
+const BACKEND = "http://localhost:8000/api";
 const { Title, Paragraph, Text } = Typography;
+const { useToken } = theme;
 
 export function Node2VecEmbeddingsComponent() {
-  // State
+  const { token } = useToken();
   const [kgFile, setKgFile] = useState<File | null>(null);
   const [formVals, setFormVals] = useState({
     dimensions: 64,
@@ -52,13 +54,10 @@ export function Node2VecEmbeddingsComponent() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Embedding results
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [jsonResult, setJsonResult] = useState<any>(null);
   const [showJsonModal, setShowJsonModal] = useState(false);
 
-  // Handlers
   const handleFileUpload = (file: File) => {
     setKgFile(file);
     setDownloadUrl(null);
@@ -100,12 +99,10 @@ export function Node2VecEmbeddingsComponent() {
       );
 
       if (formVals.output_format === "zip") {
-        // Blob: prepare download url
         const url = window.URL.createObjectURL(new Blob([resp.data]));
         setDownloadUrl(url);
         message.success("Embeddings generated! Download ready below.");
       } else {
-        // JSON: show modal with the results
         setJsonResult(resp.data);
         setShowJsonModal(true);
         message.success("Embeddings generated! See preview.");
@@ -122,7 +119,6 @@ export function Node2VecEmbeddingsComponent() {
     setLoading(false);
   };
 
-  // Table preview for JSON (small sample)
   const previewTable = (emb: any, nodes: string[]) => {
     if (!emb || !nodes) return null;
     const previewRows = nodes.slice(0, 10).map((n: string, i: number) => ({
@@ -168,30 +164,28 @@ export function Node2VecEmbeddingsComponent() {
     );
   };
 
-  // UI rendering
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: 24 }}>
-      <Title level={2}>
-        <FileZipOutlined style={{ color: "#1890ff", marginRight: 12 }} />
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: 24, background: token.colorBgContainer }}>
+      <Title level={2} style={{ color: token.colorText }}>
+        <FileZipOutlined style={{ color: token.colorPrimary, marginRight: 12 }} />
         Generate node2vec Embeddings from Knowledge Graph
       </Title>
-      <Paragraph>
+      <Paragraph style={{ color: token.colorText }}>
         Upload a <b>pickled NetworkX graph (.pkl)</b> and set node2vec
         parameters to generate node embeddings.
         <br />
-        <Text type="secondary">
+        <Text type="secondary" style={{ color: token.colorTextSecondary }}>
           No files are saved on server. All computation is in-memory.
         </Text>
       </Paragraph>
-      <Divider />
-      <AntCard bordered style={{ marginBottom: 32 }}>
+      <Divider style={{ borderColor: token.colorBorder }} />
+      <AntCard bordered style={{ marginBottom: 32, background: token.colorBgContainer }}>
         <Form
           layout="vertical"
           initialValues={formVals}
           onValuesChange={handleFormChange}
           onFinish={handleSubmit}
         >
-          {/* KG Upload */}
           <Form.Item label="Knowledge Graph (.pkl)">
             <Upload
               accept=".pkl"
@@ -204,7 +198,6 @@ export function Node2VecEmbeddingsComponent() {
               <Button icon={<UploadOutlined />}>Upload KG</Button>
             </Upload>
           </Form.Item>
-          {/* Params */}
           <Divider orientation="left">
             <SettingOutlined /> node2vec Parameters
           </Divider>
@@ -292,7 +285,6 @@ export function Node2VecEmbeddingsComponent() {
             {loading && <Spin style={{ marginLeft: 16 }} />}
           </Form.Item>
         </Form>
-        {/* Error alert if any */}
         {error && (
           <Alert
             type="error"
@@ -302,14 +294,13 @@ export function Node2VecEmbeddingsComponent() {
           />
         )}
       </AntCard>
-      {/* Download section */}
       {downloadUrl && (
         <AntCard
           bordered
-          style={{ marginBottom: 32, background: "#f8fff8" }}
+          style={{ marginBottom: 32, background: token.colorBgContainer }}
           title={
-            <span>
-              <DownloadOutlined style={{ color: "#52c41a" }} /> Download
+            <span style={{ color: token.colorText }}>
+              <DownloadOutlined style={{ color: token.colorSuccess }} /> Download
               Embeddings
             </span>
           }
@@ -324,38 +315,47 @@ export function Node2VecEmbeddingsComponent() {
           >
             Download Embeddings (.zip)
           </Button>
-          <Paragraph>
+          <Paragraph style={{ color: token.colorText }}>
             Contains <code>embeddings.npy</code> (numpy array) and{" "}
             <code>embeddings_nodes.txt</code> (node names).
           </Paragraph>
         </AntCard>
       )}
-      {/* JSON preview modal */}
       <Modal
         open={showJsonModal}
         onCancel={() => setShowJsonModal(false)}
         footer={null}
-        title="Embeddings Preview"
+        title={<span style={{ color: token.colorText }}>Embeddings Preview</span>}
         width={700}
+        styles={{
+          header: { 
+            background: token.colorBgContainer,
+            borderBottom: `1px solid ${token.colorBorder}`
+          },
+          content: { background: token.colorBgContainer },
+          body: { 
+            background: token.colorBgContainer,
+            color: token.colorText
+          }
+        }}
       >
         {jsonResult && (
           <>
-            <Paragraph>
+            <Paragraph style={{ color: token.colorText }}>
               <b>Nodes:</b> {jsonResult.nodes.length}, <b>Dimensions:</b>{" "}
               {jsonResult.embeddings[0]?.length}
             </Paragraph>
-            <Divider>Sample (first 10 nodes)</Divider>
+            <Divider style={{ borderColor: token.colorBorder }}>Sample (first 10 nodes)</Divider>
             {previewTable(jsonResult.embeddings, jsonResult.nodes)}
           </>
         )}
       </Modal>
-      {/* How to use */}
       <AntCard
         type="inner"
-        title="How to use this tool"
-        style={{ marginTop: 16 }}
+        title={<span style={{ color: token.colorText }}>How to use this tool</span>}
+        style={{ marginTop: 16, background: token.colorBgContainer }}
       >
-        <ul>
+        <ul style={{ color: token.colorText }}>
           <li>
             <b>Prepare your KG:</b> Upload a pickled NetworkX graph (.pkl).
           </li>
@@ -370,9 +370,9 @@ export function Node2VecEmbeddingsComponent() {
             <b>Download</b> the embeddings for further ML or graph analysis.
           </li>
         </ul>
-        <Divider />
-        <Paragraph>
-          <Text type="secondary">
+        <Divider style={{ borderColor: token.colorBorder }} />
+        <Paragraph style={{ color: token.colorText }}>
+          <Text type="secondary" style={{ color: token.colorTextSecondary }}>
             <InfoCircleOutlined /> All computation is in-memory. No files are
             saved on the server.
           </Text>
@@ -381,8 +381,3 @@ export function Node2VecEmbeddingsComponent() {
     </div>
   );
 }
-
-/*
-1. User uploads pickled KG, sets parameters, and downloads embeddings or previews JSON.
-2. Fully integrated with backend /node2vec_embeddings/ endpoint.
-*/
