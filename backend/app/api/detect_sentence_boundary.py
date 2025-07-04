@@ -36,33 +36,46 @@ import numpy as np
 import networkx as nx
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from fastapi.responses import JSONResponse
-
-# Import node_entropy from src/entropy.py
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
-try:
-    from entropy import node_entropy
-except ImportError:
-    raise ImportError("Could not import node_entropy from src/entropy.py. Please ensure it exists.")
+from entropy import node_entropy
 
 router = APIRouter()
 
+
+def strip_quotes(s):
+    return s.strip().strip('"').strip("'")
+
+
 def load_graph_from_filelike(kg_file):
+    kg_file = io.BytesIO(kg_file)
     kg_file.seek(0)
     return pickle.load(kg_file)
 
+
 def load_embeddings_from_filelike(emb_file, nodes_file):
+    emb_file = io.BytesIO(emb_file)
     emb_file.seek(0)
     embeddings = np.load(emb_file)
+    nodes_file = io.BytesIO(nodes_file)
     nodes_file.seek(0)
-    node_names = [ast.literal_eval(line) for line in nodes_file.read().decode("utf-8").splitlines() if line.strip()]
-    node2idx = {n: i for i, n in enumerate(node_names)}
+    node_names = [
+        ast.literal_eval(line)
+        for line in nodes_file.read().decode("utf-8").splitlines()
+        if line.strip()
+    ]
+    node2idx = {strip_quotes(n): i for i, n in enumerate(node_names)}
     return embeddings, node2idx
 
+
 def load_start_nodes_from_filelike(starts_file):
+    starts_file = io.BytesIO(starts_file)
     starts_file.seek(0)
-    nodes = [line.strip() for line in starts_file.read().decode("utf-8").splitlines() if line.strip()]
+    nodes = [
+        line.strip()
+        for line in starts_file.read().decode("utf-8").splitlines()
+        if line.strip()
+    ]
     return nodes
+
 
 def traverse_sentence_boundary(
     G,
@@ -75,8 +88,11 @@ def traverse_sentence_boundary(
     max_nodes=30,
 ):
     from collections import deque
+
     if start_node not in node2idx:
-        raise ValueError(f"Start node '{start_node}' does not have an embedding. Check node list.")
+        raise ValueError(
+            f"Start node '{start_node}' does not have an embedding. Check node list."
+        )
     visited = set()
     queue = deque()
     queue.append(start_node)
@@ -88,7 +104,12 @@ def traverse_sentence_boundary(
         neighbors = set(G.successors(curr_node)) | set(G.predecessors(curr_node))
         neighbors = [n for n in neighbors if n in node2idx]
         entropy = node_entropy(
-            embeddings, node2idx, curr_node, list(neighbors), method=method, temperature=temperature
+            embeddings,
+            node2idx,
+            curr_node,
+            list(neighbors),
+            method=method,
+            temperature=temperature,
         )
         result.append({"node": curr_node, "entropy": float(entropy)})
         visited.add(curr_node)
@@ -98,6 +119,7 @@ def traverse_sentence_boundary(
             if nb not in visited and nb not in queue:
                 queue.append(nb)
     return result
+
 
 @router.post("/detect_sentence_boundary/")
 async def detect_sentence_boundary(
@@ -117,12 +139,16 @@ async def detect_sentence_boundary(
     try:
         # Load graph and embeddings
         G = load_graph_from_filelike(await kg.read())
-        emb_file = io.BytesIO(await embeddings.read())
-        nodes_file = io.BytesIO(await nodes.read())
-        starts_file = io.BytesIO(await starts.read())
+        embeddings_bytes = await embeddings.read()
+        nodes_bytes = await nodes.read()
+        starts_bytes = await starts.read()
 
-        embeddings_arr, node2idx = load_embeddings_from_filelike(emb_file, nodes_file)
-        start_nodes = load_start_nodes_from_filelike(starts_file)
+        embeddings_arr, node2idx = load_embeddings_from_filelike(
+            embeddings_bytes, nodes_bytes
+        )
+        start_nodes = [
+            strip_quotes(n) for n in load_start_nodes_from_filelike(starts_bytes)
+        ]
 
         parsed_start_nodes = []
         for node in start_nodes:
@@ -136,11 +162,14 @@ async def detect_sentence_boundary(
         for start_node in parsed_start_nodes:
             try:
                 nodes_with_entropy = traverse_sentence_boundary(
-                    G, embeddings_arr, node2idx, start_node,
+                    G,
+                    embeddings_arr,
+                    node2idx,
+                    start_node,
                     entropy_threshold=entropy_threshold,
                     method=entropy_method,
                     temperature=temperature,
-                    max_nodes=max_nodes
+                    max_nodes=max_nodes,
                 )
                 all_results[repr(start_node)] = nodes_with_entropy
             except Exception as e:
@@ -148,4 +177,6 @@ async def detect_sentence_boundary(
 
         return JSONResponse(all_results)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Sentence boundary detection failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Sentence boundary detection failed: {str(e)}"
+        )
