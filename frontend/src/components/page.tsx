@@ -19,7 +19,16 @@ import {
   BulbOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import { Layout, Menu, Switch, Typography, ConfigProvider, theme as antdTheme, Avatar, Tooltip } from "antd";
+import {
+  Layout,
+  Menu,
+  Switch,
+  Typography,
+  ConfigProvider,
+  theme as antdTheme,
+  Avatar,
+  Tooltip,
+} from "antd";
 import App from "./AnalyticsDashboardComponent";
 import { BoundaryEvaluationComponent } from "./BoundaryEvaluationComponent";
 import { BuildKGFromTripletsComponent } from "./BuildKGFromTripletsComponent";
@@ -169,7 +178,9 @@ export default function MainPage() {
   }));
 
   // Find active component to render
-  const activeComponent = MENU.find((item) => item.key === selectedKey)?.component;
+  const activeComponent = MENU.find(
+    (item) => item.key === selectedKey
+  )?.component;
 
   // Responsive: collapse sidebar on mobile
   const [collapsed, setCollapsed] = useState(false);
@@ -180,13 +191,17 @@ export default function MainPage() {
   }, [darkMode]);
 
   return (
-    <ConfigProvider theme={{
-      algorithm: darkMode ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
-      token: {
-        colorPrimary: "#1890ff",
-        borderRadius: 12,
-      },
-    }}>
+    <ConfigProvider
+      theme={{
+        algorithm: darkMode
+          ? antdTheme.darkAlgorithm
+          : antdTheme.defaultAlgorithm,
+        token: {
+          colorPrimary: "#1890ff",
+          borderRadius: 12,
+        },
+      }}
+    >
       <Layout style={{ minHeight: "100vh", transition: "background 0.2s" }}>
         {/* Sidebar */}
         <Sider
@@ -201,10 +216,12 @@ export default function MainPage() {
             transition: "background 0.2s",
           }}
         >
-          <div style={{
-            margin: "24px auto 16px",
-            textAlign: "center",
-          }}>
+          <div
+            style={{
+              margin: "24px auto 16px",
+              textAlign: "center",
+            }}
+          >
             <img
               src={logoUrl}
               alt="Logo"
@@ -215,11 +232,19 @@ export default function MainPage() {
                 background: darkMode ? "#24292f" : "#f4f6fa",
                 boxShadow: "0 2px 8px #0002",
                 marginBottom: 8,
-                transition: "all 0.2s"
+                transition: "all 0.2s",
               }}
             />
             {!collapsed && (
-              <Title level={4} style={{ margin: 0, color: darkMode ? "#fff" : "#222", fontWeight: 700, letterSpacing: 1 }}>
+              <Title
+                level={4}
+                style={{
+                  margin: 0,
+                  color: darkMode ? "#fff" : "#222",
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                }}
+              >
                 KG Pipeline
               </Title>
             )}
@@ -236,16 +261,18 @@ export default function MainPage() {
             }}
             theme={darkMode ? "dark" : "light"}
           />
-          <div style={{
-            position: "absolute",
-            bottom: 0,
-            width: "100%",
-            textAlign: "center",
-            padding: collapsed ? "10px 0" : "16px 0",
-            background: darkMode ? "#181c24" : "#f9fafb",
-            borderTop: darkMode ? "1px solid #232733" : "1px solid #e8eaf1",
-            transition: "background 0.2s",
-          }}>
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              width: "100%",
+              textAlign: "center",
+              padding: collapsed ? "10px 0" : "16px 0",
+              background: darkMode ? "#181c24" : "#f9fafb",
+              borderTop: darkMode ? "1px solid #232733" : "1px solid #e8eaf1",
+              transition: "background 0.2s",
+            }}
+          >
             <Switch
               checkedChildren="🌙"
               unCheckedChildren="☀️"
@@ -259,9 +286,18 @@ export default function MainPage() {
               </span>
             )}
             <div style={{ marginTop: collapsed ? 0 : 14, textAlign: "center" }}>
-              <Avatar src="https://avatars.githubusercontent.com/u/3369400?v=4" size={collapsed ? 28 : 40} />
+              <Avatar
+                src="https://avatars.githubusercontent.com/u/3369400?v=4"
+                size={collapsed ? 28 : 40}
+              />
               {!collapsed && (
-                <div style={{ fontSize: 13, color: darkMode ? "#ccc" : "#222", marginTop: 6 }}>
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: darkMode ? "#ccc" : "#222",
+                    marginTop: 6,
+                  }}
+                >
                   <b>sirjanhere</b>
                 </div>
               )}
@@ -270,40 +306,51 @@ export default function MainPage() {
         </Sider>
         {/* Main Content */}
         <Layout>
-          <Header style={{
-            background: darkMode ? "#1a1e27" : "#fff",
-            padding: "0 32px",
-            borderBottom: darkMode ? "1px solid #232733" : "1px solid #e8eaf1",
-            display: "flex",
-            alignItems: "center",
-            minHeight: 60,
-            boxShadow: "0 1px 8px #0001"
-          }}>
-            <Title level={3} style={{
-              color: darkMode ? "#fff" : "#181a20",
-              margin: 0,
-              fontWeight: 700,
-              letterSpacing: 1,
-              fontSize: 22
-            }}>
-              {MENU.find(m => m.key === selectedKey)?.label}
+          <Header
+            style={{
+              background: darkMode ? "#1a1e27" : "#fff",
+              padding: "0 32px",
+              borderBottom: darkMode
+                ? "1px solid #232733"
+                : "1px solid #e8eaf1",
+              display: "flex",
+              alignItems: "center",
+              minHeight: 60,
+              boxShadow: "0 1px 8px #0001",
+            }}
+          >
+            <Title
+              level={3}
+              style={{
+                color: darkMode ? "#fff" : "#181a20",
+                margin: 0,
+                fontWeight: 700,
+                letterSpacing: 1,
+                fontSize: 22,
+              }}
+            >
+              {MENU.find((m) => m.key === selectedKey)?.label}
             </Title>
           </Header>
-          <Content style={{
-            background: darkMode ? "#12151c" : "#f7fafd",
-            padding: 40,
-            minHeight: "calc(100vh - 60px)",
-            overflow: "auto"
-          }}>
-            <div style={{
-              background: darkMode ? "#181c24" : "#fff",
-              borderRadius: 18,
-              boxShadow: darkMode ? "0 2px 16px #0003" : "0 2px 16px #e0e5f6",
-              padding: 32,
-              minHeight: 400,
-              maxWidth: 1200,
-              margin: "0 auto"
-            }}>
+          <Content
+            style={{
+              background: darkMode ? "#12151c" : "#f7fafd",
+              padding: 40,
+              minHeight: "calc(100vh - 60px)",
+              overflow: "auto",
+            }}
+          >
+            <div
+              style={{
+                background: darkMode ? "#181c24" : "#fff",
+                borderRadius: 18,
+                boxShadow: darkMode ? "0 2px 16px #0003" : "0 2px 16px #e0e5f6",
+                padding: 32,
+                minHeight: 400,
+                maxWidth: 1200,
+                margin: "0 auto",
+              }}
+            >
               {activeComponent}
             </div>
           </Content>

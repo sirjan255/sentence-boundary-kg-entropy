@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "es6"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es6"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -14,18 +18,45 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "baseUrl": "src",
     "paths": {
-      "@/*": ["*"],
-      "@/components/*": ["components/*"],
-      "@/api/*": ["api/*"],
-      "@/hooks/*": ["hooks/*"],
-      "@/pages/*": ["pages/*"],
-      "@/styles/*": ["styles/*"],
-      "@/utils/*": ["utils/*"]
-    }
+      "@/*": [
+        "*"
+      ],
+      "@/components/*": [
+        "components/*"
+      ],
+      "@/api/*": [
+        "api/*"
+      ],
+      "@/hooks/*": [
+        "hooks/*"
+      ],
+      "@/pages/*": [
+        "pages/*"
+      ],
+      "@/styles/*": [
+        "styles/*"
+      ],
+      "@/utils/*": [
+        "utils/*"
+      ]
+    },
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "build", "dist"]
+  "include": [
+    "src",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist"
+  ]
 }

@@ -4,14 +4,16 @@
   "private": true,
   "description": "Frontend for Sentence Boundary KG Entropy Analytics Dashboard",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "dev": "next dev",
+    "start": "next start",
+    "build": "next build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint src --ext js,jsx,ts,tsx"
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
+    "@babel/runtime": "^7.27.6",
     "@reduxjs/toolkit": "^2.2.3",
     "antd": "^5.26.3",
     "axios": "^1.10.0",
