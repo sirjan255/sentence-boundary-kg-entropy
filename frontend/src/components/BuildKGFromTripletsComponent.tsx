@@ -14,6 +14,7 @@ import {
   Divider,
   Tooltip,
   Modal,
+  theme,
 } from "antd";
 import {
   UploadOutlined,
@@ -25,15 +26,14 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 
-// Backend API base URL
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "/api";
+const BACKEND = "http://localhost:8000/api";
 const { Title, Paragraph, Text } = Typography;
+const { useToken } = theme;
 
-// Only allow CSV files for triplets input
 const ACCEPTED_FILE_TYPES = [".csv"];
 
 export function BuildKGFromTripletsComponent() {
-  // State for file upload, preview, loading, error, download
+  const { token } = useToken();
   const [tripletsFile, setTripletsFile] = useState<File | null>(null);
   const [previewData, setPreviewData] = useState<any>(null);
   const [kgDownloadUrl, setKgDownloadUrl] = useState<string | null>(null);
@@ -43,7 +43,6 @@ export function BuildKGFromTripletsComponent() {
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
 
-  // File upload handler (Ant Design Upload)
   const handleFileUpload = (file: File) => {
     setTripletsFile(file);
     setPreviewData(null);
@@ -53,7 +52,6 @@ export function BuildKGFromTripletsComponent() {
     return false;
   };
 
-  // Handle building KG (download .pkl)
   const handleBuildKG = async () => {
     setError(null);
     setKgDownloadUrl(null);
@@ -69,13 +67,11 @@ export function BuildKGFromTripletsComponent() {
       const formData = new FormData();
       formData.append("triplets", tripletsFile);
 
-      // POST to backend /build_kg/
       const resp = await axios.post(`${BACKEND}/build_kg/`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         responseType: "blob",
       });
 
-      // Prepare blob for download
       const url = window.URL.createObjectURL(new Blob([resp.data]));
       setKgDownloadUrl(url);
 
@@ -92,7 +88,6 @@ export function BuildKGFromTripletsComponent() {
     setLoading(false);
   };
 
-  // Handle preview (lightweight)
   const handlePreview = async () => {
     setPreviewError(null);
     setPreviewData(null);
@@ -108,7 +103,6 @@ export function BuildKGFromTripletsComponent() {
       const formData = new FormData();
       formData.append("triplets", tripletsFile);
 
-      // POST to backend /build_kg/preview/
       const resp = await axios.post(`${BACKEND}/build_kg/preview/`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -128,7 +122,6 @@ export function BuildKGFromTripletsComponent() {
     setPreviewLoading(false);
   };
 
-  // Table columns for preview
   const nodeColumns = [{ title: "Node", dataIndex: "node", key: "node" }];
   const edgeColumns = [
     { title: "Source", dataIndex: "source", key: "source" },
@@ -136,20 +129,46 @@ export function BuildKGFromTripletsComponent() {
     { title: "Target", dataIndex: "target", key: "target" },
   ];
 
-  // UI rendering
+  // Style variables based on theme
+  const containerStyle = {
+    maxWidth: 900,
+    margin: "0 auto",
+    padding: 24,
+    background: token.colorBgContainer,
+    color: token.colorText
+  };
+
+  const cardStyle = {
+    marginBottom: 32,
+    background: token.colorBgContainer,
+    color: token.colorText
+  };
+
+  const downloadCardStyle = {
+    marginBottom: 32,
+    background: token.colorBgContainer,
+    color: token.colorText
+  };
+
+  const howToUseCardStyle = {
+    marginTop: 16,
+    background: token.colorBgContainer,
+    color: token.colorText
+  };
+
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: 24 }}>
-      <Title level={2}>
-        <FileExcelOutlined style={{ color: "#1890ff", marginRight: 12 }} />
+    <div style={containerStyle}>
+      <Title level={2} style={{ color: token.colorText }}>
+        <FileExcelOutlined style={{ color: token.colorPrimary, marginRight: 12 }} />
         Build Knowledge Graph from SVO Triplets (CSV)
       </Title>
-      <Paragraph>
+      <Paragraph style={{ color: token.colorText }}>
         Upload a <b>CSV file of SVO triplets</b> (subject, verb, object[,
         sentence]) and generate a <b>pickled Knowledge Graph</b> for downstream
         tasks. You can also preview the graph structure!
       </Paragraph>
-      <Divider />
-      <AntCard bordered style={{ marginBottom: 32 }}>
+      <Divider style={{ borderColor: token.colorBorder }} />
+      <AntCard bordered style={cardStyle}>
         <Upload
           accept={ACCEPTED_FILE_TYPES.join(",")}
           beforeUpload={handleFileUpload}
@@ -163,7 +182,7 @@ export function BuildKGFromTripletsComponent() {
           <Space>
             <Button icon={<UploadOutlined />}>Upload Triplets CSV</Button>
             <Tooltip title="CSV columns: subject, verb, object (and optional sentence)">
-              <InfoCircleOutlined />
+              <InfoCircleOutlined style={{ color: token.colorText }} />
             </Tooltip>
           </Space>
         </Upload>
@@ -189,7 +208,6 @@ export function BuildKGFromTripletsComponent() {
             {loading && <Spin />}
           </Space>
         </div>
-        {/* Error alert if any */}
         {error && (
           <Alert
             type="error"
@@ -207,13 +225,12 @@ export function BuildKGFromTripletsComponent() {
           />
         )}
       </AntCard>
-      {/* Download link for KG */}
       {kgDownloadUrl && (
         <AntCard
           bordered
-          style={{ marginBottom: 32, background: "#f8fff8" }}
+          style={downloadCardStyle}
           title={
-            <span>
+            <span style={{ color: token.colorText }}>
               <DownloadOutlined style={{ color: "#52c41a" }} /> Download KG
             </span>
           }
@@ -228,27 +245,37 @@ export function BuildKGFromTripletsComponent() {
           >
             Download Pickled KG (.pkl)
           </Button>
-          <Paragraph>
+          <Paragraph style={{ color: token.colorText }}>
             Use this .pkl file in your downstream graph experiments,
             visualizations, or traversal tools.
           </Paragraph>
         </AntCard>
       )}
-      {/* Preview Modal */}
       <Modal
         open={showPreviewModal}
         onCancel={() => setShowPreviewModal(false)}
         footer={null}
-        title="KG Preview"
+        title={<span style={{ color: token.colorText }}>KG Preview</span>}
         width={700}
+        styles={{
+          header: { 
+            background: token.colorBgContainer,
+            borderBottom: `1px solid ${token.colorBorder}`
+          },
+          content: { background: token.colorBgContainer },
+          body: { 
+            background: token.colorBgContainer,
+            color: token.colorText
+          }
+        }}
       >
         {previewData && (
           <>
-            <Paragraph>
+            <Paragraph style={{ color: token.colorText }}>
               <b>Nodes:</b> {previewData.num_nodes}, <b>Edges:</b>{" "}
               {previewData.num_edges}
             </Paragraph>
-            <Divider>Nodes</Divider>
+            <Divider style={{ borderColor: token.colorBorder }}>Nodes</Divider>
             <Table
               dataSource={previewData.nodes.map(
                 (node: string, idx: number) => ({ node, key: idx })
@@ -258,8 +285,9 @@ export function BuildKGFromTripletsComponent() {
               pagination={false}
               scroll={{ y: 160 }}
               bordered
+              style={{ background: token.colorBgContainer, color: token.colorText }}
             />
-            <Divider>Edges</Divider>
+            <Divider style={{ borderColor: token.colorBorder }}>Edges</Divider>
             <Table
               dataSource={previewData.edges.map((e: any, idx: number) => ({
                 ...e,
@@ -270,17 +298,17 @@ export function BuildKGFromTripletsComponent() {
               pagination={false}
               scroll={{ y: 200 }}
               bordered
+              style={{ background: token.colorBgContainer, color: token.colorText }}
             />
           </>
         )}
       </Modal>
-      {/* How to use */}
       <AntCard
         type="inner"
-        title="How to use this tool"
-        style={{ marginTop: 16 }}
+        title={<span style={{ color: token.colorText }}>How to use this tool</span>}
+        style={howToUseCardStyle}
       >
-        <ul>
+        <ul style={{ color: token.colorText }}>
           <li>
             <b>Prepare your CSV:</b> Columns: <code>subject</code>,{" "}
             <code>verb</code>, <code>object</code> (optionally{" "}
@@ -300,9 +328,9 @@ export function BuildKGFromTripletsComponent() {
             <b>Download</b> the .pkl file for use in other apps or analysis.
           </li>
         </ul>
-        <Divider />
-        <Paragraph>
-          <Text type="secondary">
+        <Divider style={{ borderColor: token.colorBorder }} />
+        <Paragraph style={{ color: token.colorText }}>
+          <Text type="secondary" style={{ color: token.colorTextSecondary }}>
             <InfoCircleOutlined /> All computation is in-memory and secure. No
             files are saved on server.
           </Text>
@@ -311,11 +339,3 @@ export function BuildKGFromTripletsComponent() {
     </div>
   );
 }
-
-/*
-1. User uploads a CSV of SVO triplets (columns: subject, verb, object[, sentence]).
-2. Preview the KG (nodes/edges) or generate a .pkl for download.
-3. Fully integrated with backend endpoints:
-   - POST /build_kg/ for .pkl file
-   - POST /build_kg/preview/ for JSON preview
-*/
