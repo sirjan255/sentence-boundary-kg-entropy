@@ -198,6 +198,18 @@ export function GenerateNodesToStartComponent() {
     setCsvModalVisible(false);
   };
 
+    // --- Download TXT handler ---
+  const handleDownloadTxt = () => {
+    const textContent = result.join("\n");
+    const blob = new Blob([textContent], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "start_nodes.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // --- Table columns for displaying extracted nodes ---
   const columns = [
     {
@@ -293,6 +305,16 @@ export function GenerateNodesToStartComponent() {
                 >
                   Download CSV
                 </Button>
+              )}
+              {result.length > 0 && (
+                <Tooltip title="Download as text file">
+                  <Button 
+                    icon={<FileTextOutlined />} 
+                    onClick={handleDownloadTxt}
+                  >
+                    Download TXT
+                  </Button>
+                </Tooltip>
               )}
               {/* Copy to clipboard */}
               {result.length > 0 && (
