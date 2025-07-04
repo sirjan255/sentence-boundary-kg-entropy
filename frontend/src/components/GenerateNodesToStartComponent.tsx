@@ -210,7 +210,7 @@ export function GenerateNodesToStartComponent() {
         Upload a <b>text, PDF, or image</b> file, or paste your text below. This tool extracts the <b>subject</b> of the first SVO (subject-verb-object) triplet in each sentence to generate a list of starting nodes. <br />
         Use these nodes as entry points for graph traversal or sentence boundary evaluation!
       </Paragraph>
-      <AntCard bordered style={{ marginBottom: 24 }}>
+      <AntCard variant="borderless" style={{ marginBottom: 24 }}>
         <Form layout="vertical">
           {/* File upload (txt/pdf/image) */}
           <Form.Item
