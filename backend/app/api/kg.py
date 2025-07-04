@@ -35,10 +35,12 @@ async def build_kg(triplets: UploadFile = File(...)):
     """
     Accepts a CSV file of SVO triplets and returns the pickled Knowledge Graph.
     """
-    if not triplets.filename.endswith(".csv"):
+    if triplets.filename and not triplets.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Please upload a .csv file.")
     try:
-        G = build_kg_from_triplets_filelike(await triplets.read())
+        file_bytes = await triplets.read()
+        file_like = io.BytesIO(file_bytes)
+        G = build_kg_from_triplets_filelike(file_like)
         # Serialize with pickle and return as a streaming response
         buf = io.BytesIO()
         pickle.dump(G, buf)
@@ -47,6 +49,7 @@ async def build_kg(triplets: UploadFile = File(...)):
             "Content-Disposition": "attachment; filename=kg.pkl"
         })
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=f"KG construction failed: {str(e)}")
 
 @router.post("/build_kg/preview/")
@@ -54,10 +57,12 @@ async def build_kg_preview(triplets: UploadFile = File(...)):
     """
     Accepts a CSV file of SVO triplets and returns a lightweight JSON preview of the KG.
     """
-    if not triplets.filename.endswith(".csv"):
+    if triplets.filename and not triplets.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Please upload a .csv file.")
     try:
-        G = build_kg_from_triplets_filelike(await triplets.read())
+        file_bytes = await triplets.read()
+        file_like = io.BytesIO(file_bytes)
+        G = build_kg_from_triplets_filelike(file_like)
         nodes = list(G.nodes)
         edges = [{"source": u, "target": v, "verb": d.get("verb", "")} for u, v, d in G.edges(data=True)]
         return JSONResponse({"num_nodes": len(nodes), "num_edges": len(edges), "nodes": nodes, "edges": edges})
