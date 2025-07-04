@@ -16,7 +16,6 @@ import {
 import { UploadOutlined, CheckCircleTwoTone } from "@ant-design/icons";
 import axios from "axios";
 
-
 const BACKEND = process.env.REACT_APP_BACKEND || "/api";
 const { Title, Paragraph } = Typography;
 
@@ -97,26 +96,25 @@ export function EvaluateBoundariesNormalizedComponent() {
   ];
 
   // Build table data from result
-  const tableData =
-    result
-      ? [
-          {
-            key: "1",
-            metric: "Macro Precision",
-            score: result.macro_precision,
-          },
-          {
-            key: "2",
-            metric: "Macro Recall",
-            score: result.macro_recall,
-          },
-          {
-            key: "3",
-            metric: "Macro F1",
-            score: result.macro_f1,
-          },
-        ]
-      : [];
+  const tableData = result
+    ? [
+        {
+          key: "1",
+          metric: "Macro Precision",
+          score: result.macro_precision,
+        },
+        {
+          key: "2",
+          metric: "Macro Recall",
+          score: result.macro_recall,
+        },
+        {
+          key: "3",
+          metric: "Macro F1",
+          score: result.macro_f1,
+        },
+      ]
+    : [];
 
   // ----------- UI Rendering starts here -----------
   return (
@@ -124,9 +122,23 @@ export function EvaluateBoundariesNormalizedComponent() {
       {/* Title and instructions */}
       <Title level={3}>Evaluate Sentence Boundary Predictions (Normalized)</Title>
       <Paragraph>
-        Upload your <b>predicted</b> and <b>actual</b> sentence boundary files (in JSON format), then click <b>Evaluate</b> to compute macro precision, recall, and F1-score. This tool automatically normalizes noisy or variant keys/nodes.
+        Upload your <b>predicted</b> and <b>actual</b> sentence boundary files (in JSON format),
+        then click <b>Evaluate</b> to compute macro precision, recall, and F1-score. This tool
+        automatically normalizes noisy or variant keys/nodes.
       </Paragraph>
-      <AntCard bordered style={{ marginBottom: 32 }}>
+
+      {/* Main form card - updated with proper dark mode styling */}
+      <AntCard 
+        style={{ 
+          marginBottom: 32,
+          background: 'transparent'
+        }}
+        bodyStyle={{
+          padding: 24,
+          background: 'var(--ant-component-background)',
+          borderRadius: 8
+        }}
+      >
         <Form layout="vertical" onFinish={handleSubmit}>
           {/* Upload: Predicted */}
           <Form.Item
@@ -139,15 +151,12 @@ export function EvaluateBoundariesNormalizedComponent() {
               beforeUpload={handleFileUpload(setPredictedFile)}
               showUploadList={predictedFile ? { showRemoveIcon: false } : false}
               maxCount={1}
-              fileList={
-                predictedFile
-                  ? [{ uid: "-1", name: predictedFile.name }]
-                  : []
-              }
+              fileList={predictedFile ? [{ uid: "-1", name: predictedFile.name }] : []}
             >
               <Button icon={<UploadOutlined />}>Upload Predicted</Button>
             </Upload>
           </Form.Item>
+
           {/* Upload: Actual */}
           <Form.Item
             label="Actual Boundaries (Ground Truth, JSON)"
@@ -159,15 +168,12 @@ export function EvaluateBoundariesNormalizedComponent() {
               beforeUpload={handleFileUpload(setActualFile)}
               showUploadList={actualFile ? { showRemoveIcon: false } : false}
               maxCount={1}
-              fileList={
-                actualFile
-                  ? [{ uid: "-2", name: actualFile.name }]
-                  : []
-              }
+              fileList={actualFile ? [{ uid: "-2", name: actualFile.name }] : []}
             >
               <Button icon={<UploadOutlined />}>Upload Actual</Button>
             </Upload>
           </Form.Item>
+
           {/* Submit button */}
           <Form.Item>
             <Space>
@@ -185,6 +191,7 @@ export function EvaluateBoundariesNormalizedComponent() {
             </Space>
           </Form.Item>
         </Form>
+
         {/* Show error if any */}
         {error && (
           <Alert
@@ -195,9 +202,16 @@ export function EvaluateBoundariesNormalizedComponent() {
           />
         )}
       </AntCard>
+
       {/* Output metrics table */}
       {result && (
-        <AntCard bordered title="Evaluation Metrics" style={{ marginTop: 16 }}>
+        <AntCard 
+          title="Evaluation Metrics" 
+          style={{ marginTop: 16 }}
+          bodyStyle={{
+            padding: 0
+          }}
+        >
           <Table
             dataSource={tableData}
             columns={columns}
@@ -207,11 +221,16 @@ export function EvaluateBoundariesNormalizedComponent() {
           />
         </AntCard>
       )}
+
       {/* Help: where to get your files */}
       <AntCard
-        type="inner"
         title="Where do I get the JSON files?"
-        style={{ marginTop: 16, background: "#fafafa" }}
+        style={{ marginTop: 16 }}
+        bodyStyle={{
+          padding: 24,
+          background: 'var(--ant-component-background)',
+          borderRadius: 8
+        }}
       >
         <ul>
           <li>
